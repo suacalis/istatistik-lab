@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İstatistiğe Giriş · Etkileşimli Uygulamalar Portalı</title>
+<meta name="description" content="İstatistiğe giriş dersi için 13 etkileşimli, Türkçe istatistik uygulaması: örnekleme, betimsel istatistik, korelasyon, regresyon, olasılık, güven aralıkları ve hipotez testleri.">
+<link rel="stylesheet" href="assets/ortak.css">
+<style>
+  body{background:#f6f6f4}
+  .ust{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#fff;border-bottom:1px solid var(--kenar);padding:0 28px;position:sticky;top:0;z-index:30;flex-wrap:wrap}
+  .marka{display:flex;align-items:center;gap:12px;padding:12px 0;text-decoration:none}
+  .marka .ikon{width:42px;height:42px;border-radius:10px;background:var(--kirmizi);display:grid;place-items:center}
+  .marka b{display:block;font-family:var(--serif);font-size:20px;color:var(--mavi);line-height:1.1}
+  .marka span{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--kirmizi)}
+  nav.ana-menu{display:flex;gap:4px;flex-wrap:wrap}
+  nav.ana-menu a{padding:20px 16px;font-size:14px;font-weight:600;color:var(--soluk);text-decoration:none;border-bottom:3px solid transparent}
+  nav.ana-menu a.aktif{color:var(--mavi);border-bottom-color:var(--mavi)}
+  .gorunum{display:none}.gorunum.aktif{display:block}
+  .kahraman{background:linear-gradient(135deg,#083766 0%,#0b4a8b 55%,#1d5fa8 100%);color:#fff;padding:70px 28px 80px;position:relative;overflow:hidden}
+  .kahraman::after{content:'';position:absolute;right:-120px;top:-120px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.10),transparent 65%)}
+  .kahraman .ic{max-width:1100px;margin:0 auto;position:relative;z-index:1}
+  .kahraman h1{font-family:var(--serif);font-size:46px;line-height:1.1;margin:0 0 18px;max-width:780px}
+  .kahraman p{font-size:18px;line-height:1.6;max-width:760px;opacity:.92}
+  .cta{display:inline-flex;align-items:center;gap:10px;background:var(--kirmizi);color:#fff;text-decoration:none;font-weight:800;letter-spacing:.08em;padding:15px 26px;border-radius:10px;margin-top:18px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+  .cta:hover{background:#a81a26}
+  .ozellik{max-width:1100px;margin:-44px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:0 28px;position:relative;z-index:2}
+  .ozellik .kart{padding:22px}
+  .ozellik .sayi{font-family:var(--serif);font-size:34px;font-weight:700;color:var(--kirmizi)}
+  .ozellik h3{margin:6px 0;font-size:16px;color:var(--mavi);font-family:var(--serif)}
+  .ozellik p{margin:0;font-size:13.5px;color:#444;line-height:1.55}
+  @media (max-width:900px){.ozellik{grid-template-columns:1fr 1fr}.kahraman h1{font-size:34px}}
+  @media (max-width:560px){.ozellik{grid-template-columns:1fr}}
+  .sayfa{max-width:1200px;margin:0 auto;padding:36px 28px}
+  .sayfa-bas h1{font-family:var(--serif);color:var(--mavi);font-size:34px;margin:0 0 8px}
+  .sayfa-bas p{font-size:15.5px;color:#444;line-height:1.6;max-width:880px}
+  .canli{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--yesil);background:var(--yesil-acik);border-radius:999px;padding:5px 11px}
+  .canli::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--yesil);box-shadow:0 0 0 3px rgba(20,150,111,.25)}
+  .hizli{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0 8px;font-size:13px;font-weight:700;color:var(--soluk)}
+  .hizli a{border:1px solid var(--kenar);background:#fff;border-radius:999px;padding:6px 14px;text-decoration:none;color:var(--mavi);font-weight:700}
+  .hizli a:hover{background:var(--mavi);color:#fff}
+  .arama{max-width:420px;margin-top:10px}
+  .modul{margin-top:38px;scroll-margin-top:90px}
+  .modul-bas{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+  .modul-bas .harf{width:52px;height:52px;border-radius:14px;background:var(--mavi);color:#fff;font-family:var(--serif);font-size:26px;font-weight:700;display:grid;place-items:center;flex:none}
+  .modul-bas h2{margin:2px 0 4px;font-size:15px;letter-spacing:.06em;color:var(--mavi)}
+  .modul-bas p{margin:0;font-size:14px;color:#555;line-height:1.5}
+  .kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+  .uyg{background:#fff;border:1px solid var(--kenar);border-radius:16px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;transition:.18s;position:relative;text-decoration:none;color:inherit}
+  .uyg:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(11,74,139,.14);border-color:#c9d8ee}
+  .uyg .no{font-family:var(--mono);font-size:11.5px;font-weight:800;color:var(--soluk);letter-spacing:.06em}
+  .uyg .pop{position:absolute;top:16px;right:16px;font-size:10px;font-weight:800;letter-spacing:.1em;background:var(--kirmizi);color:#fff;border-radius:5px;padding:3px 7px}
+  .uyg .simge{width:46px;height:46px;border-radius:12px;background:var(--mavi-acik);display:grid;place-items:center;font-size:22px}
+  .uyg h3{margin:2px 0 0;font-family:var(--serif);font-size:18px;color:var(--metin)}
+  .uyg p{margin:0;font-size:13.5px;color:#555;line-height:1.5;flex:1}
+  .uyg .etiketler{display:flex;gap:6px;flex-wrap:wrap}
+  .uyg .etiketler span{font-size:10.5px;font-weight:700;background:#f1f1f1;color:#555;border-radius:4px;padding:2px 6px}
+  .uyg .ac{margin-top:6px;font-size:12.5px;font-weight:800;letter-spacing:.08em;color:var(--kirmizi)}
+  .alinti{border-left:4px solid var(--kirmizi);background:#fff;padding:16px 20px;border-radius:0 12px 12px 0;font-family:var(--serif);font-size:19px;font-style:italic;color:var(--mavi);margin:18px 0}
+  .liste-izgara{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media (max-width:900px){.liste-izgara{grid-template-columns:1fr 1fr}}
+  .liste-izgara .kart h3{font-size:16px}
+  .liste-izgara ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;color:#333}
+  .bolum-baslik{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--kirmizi);margin:30px 0 6px}
+  .eslesme{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .eslesme .kart{padding:16px}
+  .eslesme .kart .e{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--kirmizi)}
+  .eslesme .kart a{display:block;font-size:13.5px;margin:5px 0;color:var(--mavi);text-decoration:none;font-weight:600}
+  .eslesme .kart a:hover{text-decoration:underline}
+  .eslesme .kart .r{font-family:var(--mono);font-size:11px;color:var(--soluk);margin-top:6px}
+  .alt-k{background:#1d2433;color:#cbd5e1;padding:30px 28px;text-align:center;font-size:13px;line-height:1.7;margin-top:40px}
+  .alt-k b{color:#fff}
+  .alt-k a{color:#93c5fd}
+</style>
+</head>
+<body>
+<header class="ust">
+  <a class="marka" href="#ana"><div class="ikon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><div><b>İstatistik Uygulama Portalı</b><span>İSTATİSTİĞE GİRİŞ</span></div></a>
+  <nav class="ana-menu">
+    <a href="#ana" data-g="ana">Ana Sayfa</a>
+    <a href="#ders" data-g="ders">Ders Bilgisi</a>
+    <a href="#uygulamalar" data-g="uygulamalar">Tüm Uygulamalar</a>
+    <a href="#rehber" data-g="rehber">Eğitmen Rehberi</a>
+  </nav>
+</header>
+
+<!-- ================= ANA SAYFA ================= -->
+<section class="gorunum" id="g-ana">
+  <div class="kahraman"><div class="ic">
+    <h1>İstatistiği Etkileşimli Keşifle Öğrenin</h1>
+    <p>İstatistiğe giriş dersi için tasarlanmış görsel ve etkileşimli uygulamaları keşfedin. Bu uygulamalar; olasılık, örnekleme, güven aralıkları, regresyon ve istatistiksel akıl yürütme konularında, tekrarlayan hesaplamalar yerine <b>simülasyon ve keşif</b> yoluyla sezgi geliştirmenize yardımcı olur.</p>
+    <a class="cta" href="#uygulamalar">ETKİLEŞİMLİ UYGULAMALARI KEŞFEDİN →</a>
+  </div></div>
+  <div class="ozellik">
+    <div class="kart"><div class="sayi">13</div><h3>Etkileşimli Uygulama</h3><p>Veri görselleştirme, örnekleme, olasılık, güven aralıkları, hipotez testleri, regresyon ve simülasyon temelli öğrenme dahil temel giriş konularını kapsar.</p></div>
+    <div class="kart"><div class="sayi">👁</div><h3>Görsel Öğrenme İçin</h3><p>Etkileşimli kaydırıcılar, simülasyonlar ve grafikler, öğrencilerin istatistiksel fikirleri dinamik olarak keşfetmesine ve kavramsal anlayışı güçlendirmesine yardımcı olur.</p></div>
+    <div class="kart"><div class="sayi">0</div><h3>Programlama Gerekmez</h3><p>Kodlama ya da istatistik yazılımı gerekmez. Öğrenciler kavramlara, yoruma ve keşfe odaklanabilir. Tarayıcıda, kurulum olmadan çalışır.</p></div>
+    <div class="kart"><div class="sayi">TR</div><h3>Tamamen Türkçe</h3><p>Arayüz, açıklamalar, vaka çalışmaları ve geri bildirimler Türkçedir; sayılar Türkçe ondalık biçimiyle (virgül) gösterilir.</p></div>
+  </div>
+  <div class="sayfa">
+    <div class="sayfa-bas"><h1>Öne Çıkan Uygulamalar</h1><p>Derste en sık kullanılan üç uygulamayla başlayın ya da <a href="#uygulamalar">tüm listeye</a> göz atın.</p></div>
+    <div class="kartlar" id="oneCikan"></div>
+  </div>
+</section>
+
+<!-- ================= DERS BİLGİSİ ================= -->
+<section class="gorunum" id="g-ders"><div class="sayfa">
+  <div class="sayfa-bas"><h1>Bu Uygulamalar Derse Nasıl Destek Olur?</h1><p>İstatistiğe girişte kavramsal anlayışı desteklemek için tasarlanmış etkileşimli öğrenme araçları.</p></div>
+  <p class="bolum-baslik">DERSİN YAKLAŞIMI</p>
+  <div class="kart">
+    <h2>Ders Felsefesi ve İstatistiksel Akıl Yürütme</h2>
+    <p style="font-size:15px;line-height:1.65">Ders şunları vurgular:</p>
+    <ul style="font-size:15px;line-height:1.8"><li>istatistiksel sonuçları yorumlamak,</li><li>araştırma tasarımlarını değerlendirmek,</li><li>varsayımları sınamak,</li><li>ve veriyi bağlamı içinde anlamak.</li></ul>
+    <p style="font-size:15px;line-height:1.65">Öğrenciler formül ezberine odaklanmak yerine görsel yorum, akıl yürütme ve uygulamalı istatistiksel düşünme yoluyla kavramsal bir anlayış geliştirir.</p>
+    <div class="alinti">“Öğrencilerin bir istatistiksel sonuca bakıp şunu sormasını istiyoruz: Bu, bağlamı içinde gerçekte ne anlama geliyor?”</div>
+  </div>
+  <p class="bolum-baslik">HESAP MAKİNESİ VE YAZILIMI TAMAMLAR</p>
+  <div class="kart">
+    <h2>Hesaplamanın Ötesinde Anlama</h2>
+    <p style="font-size:15px;line-height:1.65">Bilimsel/grafik hesap makinesi ya da istatistik yazılımları (Excel, SPSS, R, Jamovi vb.) sınavlar ve standart ders çalışmaları için gerekli olmaya devam eder. Bu etkileşimli uygulamalar, hesap makinesi ve yazılım temelli öğretimin <b>yerini almak için değil, onu tamamlamak için</b> tasarlanmıştır.</p>
+    <p style="font-size:15px;line-height:1.65">Uygulamalar, yalnızca hesap makinesinin kolayca açıklayamayacağı istatistiksel fikirler için sezgi geliştirmeye yardımcı olur. Parametreleri dinamik olarak değiştirip sonuçları gerçek zamanlı görerek öğrenciler şunları daha iyi kavrar:</p>
+    <ul style="font-size:15px;line-height:1.8"><li>örnekleme değişkenliği,</li><li>güven aralıkları,</li><li>regresyonun davranışı,</li><li>olasılık kavramları,</li><li>ve istatistiksel karar verme.</li></ul>
+    <div class="not mavi" style="font-size:15px"><b>Hesap makinesi hesaplar; bu uygulamalar ise sonuçların gerçekte ne anlama geldiğini yorumlamaya yardımcı olur.</b></div>
+  </div>
+  <p class="bolum-baslik">DERSTE NELER ÖĞRENİLİR?</p>
+  <p style="font-size:14.5px;color:#444">Giriş düzeyindeki istatistiğin ana konularıyla uyumlu etkileşimli uygulamalar.</p>
+  <div class="liste-izgara">
+    <div class="kart"><h3>📊 Veriyi Keşfetmek ve Anlamak</h3><ul><li>Kategorik ve sayısal değişkenler</li><li>Histogram ve kutu grafikleri</li><li>Merkez ve yayılım ölçüleri</li><li>Dağılımları karşılaştırma</li><li>Normal modeller ve z-puanları</li></ul></div>
+    <div class="kart"><h3>🔗 Değişkenler Arası İlişkiler</h3><ul><li>Saçılım grafikleri</li><li>Korelasyon</li><li>Doğrusal regresyon</li><li>Eğim ve ilişkinin yorumu</li><li>Regresyon varsayımları</li></ul></div>
+    <div class="kart"><h3>🎯 Veri Toplamak</h3><ul><li>Popülasyon ve örneklem</li><li>Örnekleme yöntemleri</li><li>Örnekleme yanlılığı</li><li>Anket tasarımı</li><li>Gözlemsel çalışmalar</li></ul></div>
+    <div class="kart"><h3>⚖️ Çıkarım ve Karar Verme</h3><ul><li>Olasılık kavramları</li><li>Merkezi Limit Teoremi</li><li>Güven aralıkları</li><li>Hipotez testleri</li><li>I. ve II. tip hatalar</li></ul></div>
+  </div>
+  <p class="bolum-baslik">PEDAGOJİK ÇERÇEVE</p>
+  <div class="not" style="font-size:15px">Bu etkileşimli uygulamalar sınıf içi öğretimi desteklemek ve İstatistiğe Giriş dersinde kavramsal öğrenmeyi güçlendirmek amacıyla tasarlanmıştır.</div>
+</div></section>
+
+<!-- ================= TÜM UYGULAMALAR ================= -->
+<section class="gorunum" id="g-uygulamalar"><div class="sayfa">
+  <div class="sayfa-bas">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="kb" style="margin:0">ETKİLEŞİMLİ İSTATİSTİK UYGULAMALARI MERKEZİ</span><span class="canli">13 UYGULAMA YAYINDA</span></div>
+    <h1>Etkileşimli İstatistik Uygulamalarını Keşfedin</h1>
+    <p>İstatistiğe Giriş dersinde kavramsal anlayışı desteklemek için tasarlanmış 13 etkileşimli uygulamayı keşfedin. Uygulamalar, ders müfredatının kronolojik akışına göre düzenlenmiştir.</p>
+    <div class="hizli">Hızlı geçiş: <a href="#modul-A">Modül A</a><a href="#modul-B">Modül B</a><a href="#modul-C">Modül C</a><a href="#modul-D">Modül D</a></div>
+    <input type="text" class="arama" id="ara" placeholder="🔍 Uygulama ara (ör. regresyon, güven, zar)…">
+  </div>
+  <div id="moduller"></div>
+</div></section>
+
+<!-- ================= EĞİTMEN REHBERİ ================= -->
+<section class="gorunum" id="g-rehber"><div class="sayfa">
+  <div class="sayfa-bas"><h1>Eğitmen Rehberi ve Öğretim Stratejileri</h1></div>
+  <p class="bolum-baslik">DERSE ENTEGRASYON</p>
+  <div class="izgara-3">
+    <div class="kart"><h3>📽 Ders Sırasında Yansıtma ve Not Alma</h3><p style="font-size:14px;line-height:1.6">Uygulamalar canlı sınıf gösterimlerinde ve yansıtılan derslerde iyi çalışacak biçimde tasarlanmıştır. Eğitmenler simülasyonların üzerine doğrudan not alabilir, grafikleri tam ekran büyütebilir ve sınıf tartışmaları sırasında istatistiksel örüntüleri dinamik olarak vurgulayabilir.</p></div>
+    <div class="kart"><h3>🙋 Sınıf İçi Etkin Öğrenme</h3><p style="font-size:14px;line-height:1.6">Eğitmenler, öğrencilerin kendi cihazlarında uygulamaları keşfederek tahminlerini sınadığı, sonuçları yorumladığı ve istatistiksel fikirleri birlikte tartıştığı kısa sınıf etkinlikleri düzenleyebilir.</p><p style="font-size:14px;line-height:1.6">Örneğin öğrenciler, <a href="uygulamalar/08-korelasyon.html">Korelasyon ve Saçılım Grafiği</a> uygulamasında gerçek değeri görmeden önce korelasyonun gücünü gözle tahmin edebilir.</p></div>
+    <div class="kart"><h3>💻 Programlama Gerekmez</h3><p style="font-size:14px;line-height:1.6">Uygulamalar giriş düzeyindeki öğrenciler için tasarlanmıştır ve programlama deneyimi gerektirmez. Öğrenciler istatistik yazılımı ya da kodlama yerine kaydırıcılar, düğmeler, simülasyonlar ve görsel denetimlerle etkileşime girer.</p></div>
+  </div>
+  <p class="bolum-baslik">ÖĞRENCİ KATILIMI</p>
+  <div class="izgara-3">
+    <div class="kart"><h3>👁 Kavramları Görsel Olarak Keşfetme</h3><p style="font-size:14px;line-height:1.6">Öğrenciler kaydırıcıları, örnekleme ayarlarını ve grafik gösterimlerini değiştirerek istatistiksel kavramlar için dinamik bir sezgi geliştirir.</p></div>
+    <div class="kart"><h3>🔍 Sonuçları Keşfetme ve Yorumlama</h3><p style="font-size:14px;line-height:1.6">Öğrenciler beklenen sonuçları simülasyon sonuçlarıyla karşılaştırır ve istatistiksel anlamı bağlamı içinde yorumlama alıştırması yapar.</p></div>
+    <div class="kart"><h3>🔁 Ders Kavramlarını Pekiştirme</h3><p style="font-size:14px;line-height:1.6">Uygulamalara ödev, sınav hazırlığı ya da bağımsız keşif sırasında yeniden dönülerek kavramsal anlayış güçlendirilebilir.</p></div>
+  </div>
+  <p class="bolum-baslik">KONUYA GÖRE ÖNERİLEN UYGULAMA EŞLEŞTİRMELERİ</p>
+  <div class="eslesme" id="eslesme"></div>
+  <p class="bolum-baslik">ÖRNEK SINIF ETKİNLİKLERİ</p>
+  <div class="kart"><ul style="font-size:14px;line-height:1.85;margin:0">
+    <li><b>Tahmin et – sına – açıkla:</b> Öğrenciler önce sonucu tahmin eder (ör. “n'yi dörde katlarsak hata payı ne olur?”), sonra uygulamada sınar, sonra farkı açıklar.</li>
+    <li><b>Yanlılık avı (Uygulama 02):</b> Her grup bir yöntem seçer, 500 tekrarla karşılaştırır ve yöntemini yanlılık/değişkenlik açısından sınıfa sunar.</li>
+    <li><b>Korelasyon turnuvası (Uygulama 08):</b> 10 turluk tahmin oyunu; en düşük ortalama hatayı yapan grup kazanır.</li>
+    <li><b>%95 ne demek? (Uygulama 11):</b> Sınıfça 100 örneklem çekin; kaç aralığın kaçırdığını sayın ve “güven” kelimesinin anlamını tartışın.</li>
+    <li><b>Halat çekişi (Uygulama 13):</b> α'yı küçültünce β'nın neden büyüdüğünü, n'yi artırınca ikisinin birlikte nasıl küçüldüğünü gösterin.</li>
+  </ul></div>
+</div></section>
+
+<footer class="alt-k">
+  <b>İstatistiğe Giriş · Etkileşimli Uygulamalar Portalı</b><br>
+  Uygulamalar modern web teknolojileriyle (HTML, CSS, JavaScript) geliştirilmiştir; tarayıcıda çevrim dışı da çalışır.<br>
+  Bu portal, University of Dayton <i>MTH 207 Statistics App Portal</i>'daki uygulamalardan esinlenerek Türkçeye uyarlanmış ve yeniden yazılmıştır.
+</footer>
+
+<script>
+const UYG = [
+  {no: '01', m: 'A', ad: 'Popülasyon ve Örneklem', d: 'Popülasyonları, örneklemleri, parametreleri ve örneklem istatistiklerini görsel olarak karşılaştırın.', s: '🎯', dosya: '01-populasyon-orneklem.html', e: ['örnekleme hatası', 'MLT']},
+  {no: '02', m: 'A', ad: 'Örnekleme Yöntemleri ve Yanlılık', d: 'Farklı örnekleme yöntemlerinin yanlılığı nasıl doğurduğunu ya da azalttığını keşfedin.', s: '🧭', dosya: '02-orneklem-yontemleri.html', e: ['BRÖ', 'tabakalı', 'küme']},
+  {no: '03', m: 'A', ad: 'Kategorik Verileri Keşfet', d: 'Kategorik verileri frekans tabloları, çubuk grafikler, pasta grafikler ve Pareto grafikleriyle görselleştirin.', s: '📊', dosya: '03-kategorik-veriler.html', e: ['çubuk', 'pasta', 'CSV']},
+  {no: '04', m: 'A', ad: 'Sayısal Verileri Keşfet', d: 'Şekil, merkez, yayılım ve aykırı değerleri histogram, nokta grafiği, kutu grafiği ve gövde-yaprakla inceleyin.', s: '📈', dosya: '04-sayisal-veriler.html', e: ['histogram', 'çarpıklık']},
+  {no: '05', m: 'B', ad: 'Çapraz Tablolar ve Paradoks', d: 'İki yönlü tabloları, koşullu yüzdeleri ve Simpson Paradoksu\'nu etkileşimli olarak keşfedin.', s: '▦', dosya: '05-capraz-tablolar.html', e: ['koşullu dağılım', 'Simpson']},
+  {no: '06', m: 'B', ad: 'Dağılımları Karşılaştırma', d: 'Birden çok grubu kutu ve keman grafikleriyle görsel olarak karşılaştırın; kendi verinizi yükleyin.', s: '📦', dosya: '06-dagilimlari-karsilastirma.html', e: ['kutu grafiği', 'Iris']},
+  {no: '07', m: 'B', ad: 'Normal Model ve Ampirik Kural', d: 'z-puanlarını, normal dağılımları ve 68–95–99,7 ampirik kuralını görselleştirin.', s: '🔔', dosya: '07-normal-model.html', e: ['z-puanı', 'yüzdelik']},
+  {no: '08', m: 'B', ad: 'Korelasyon ve Saçılım Grafiği', d: 'Saçılım grafiklerini, ilişki örüntülerini ve korelasyon gücünü etkileşimli olarak keşfedin; tahmin oyununu oynayın.', s: '⚬', dosya: '08-korelasyon.html', pop: true, e: ['r', 'oyun']},
+  {no: '09', m: 'B', ad: 'Regresyon ve Eğri Uydurma', d: 'Regresyon doğrularını, tahmin doğruluğunu, artık örüntülerini ve eğri uydurmayı görsel olarak inceleyin.', s: '📉', dosya: '09-regresyon.html', e: ['EKK', 'artıklar', 'Q-Q']},
+  {no: '10', m: 'C', ad: 'Büyük Sayılar Yasası Simülatörü', d: 'Tekrarlanan deneylerde ve uzun dönemli simülasyonlarda olasılıkların nasıl kararlı hâle geldiğini görün.', s: '🎲', dosya: '10-buyuk-sayilar-yasasi.html', e: ['yazı-tura', 'zar']},
+  {no: '11', m: 'D', ad: 'Örnekleme Dağılımı ve Güven Aralığı', d: 'Örnekleme değişkenliğini ve güven aralığı kapsamasını dinamik olarak keşfedin.', s: '↔', dosya: '11-guven-araligi.html', pop: true, e: ['kapsama', 't-aralığı']},
+  {no: '12', m: 'D', ad: 'Merkezi Limit Teoremi ve Student t', d: 'Örneklem büyüklüğü arttıkça örnekleme dağılımlarının nasıl değiştiğini görselleştirin.', s: '∿', dosya: '12-merkezi-limit-teoremi.html', pop: true, e: ['MLT', 'serbestlik derecesi']},
+  {no: '13', m: 'D', ad: 'Hipotez Testleri ve Karar Hataları', d: 'p-değerlerini, anlamlılık düzeylerini ve I./II. tip hataları etkileşimli olarak keşfedin.', s: '⚖', dosya: '13-hipotez-testleri.html', e: ['p-değeri', 'güç']}
+];
+const MODUL = {
+  A: {ad: 'MODÜL A: VERİ TOPLAMA VE BETİMSEL İSTATİSTİK', d: 'Örnekleme yöntemlerini, kategorik verileri, dağılımları ve veriyi betimlemek için kullanılan grafiksel özetleri keşfedin.', sira: ['01', '02', '03', '04']},
+  B: {ad: 'MODÜL B: İLİŞKİLER VE MODELLEME', d: 'Saçılım grafikleri, korelasyon, regresyon, dağılımlar ve görsel karşılaştırmalarla değişkenler arasındaki ilişkileri keşfedin.', sira: ['05', '06', '07', '08', '09']},
+  C: {ad: 'MODÜL C: OLASILIĞIN TEMELLERİ', d: 'Etkileşimli simülasyonlarla olasılık, rastlantısallık, uzun dönem davranışı ve deney sonuçları için sezgi geliştirin.', sira: ['10']},
+  D: {ad: 'MODÜL D: ÇIKARIMSAL İSTATİSTİK', d: 'Örnekleme dağılımlarını, güven aralıklarını, Merkezi Limit Teoremi\'ni ve hipotez testi kavramlarını etkileşimli olarak keşfedin.', sira: ['11', '12', '13']}
+};
+const bul = no => UYG.find(u => u.no === no);
+const kart = u => `<a class="uyg" href="uygulamalar/${u.dosya}">${u.pop ? '<span class="pop">POPÜLER</span>' : ''}<div class="simge">${u.s}</div><div class="no">UYGULAMA ${u.no}</div><h3>${u.ad}</h3><p>${u.d}</p><div class="etiketler">${u.e.map(x => `<span>${x}</span>`).join('')}</div><div class="ac">UYGULAMAYI AÇ →</div></a>`;
+function modulleriCiz(q = '') {
+  q = q.toLocaleLowerCase('tr');
+  const eslesir = u => !q || (u.ad + ' ' + u.d + ' ' + u.e.join(' ')).toLocaleLowerCase('tr').includes(q);
+  document.getElementById('moduller').innerHTML = Object.entries(MODUL).map(([h, m]) => { const k = m.sira.map(bul).filter(eslesir); if (!k.length) return '';
+    return `<div class="modul" id="modul-${h}"><div class="modul-bas"><div class="harf">${h}</div><div><h2>${m.ad}</h2><p>${m.d}</p></div></div><div class="kartlar">${k.map(kart).join('')}</div></div>`; }).join('') || '<p style="margin-top:30px;color:#666">Aramanızla eşleşen uygulama bulunamadı.</p>';
+}
+document.getElementById('oneCikan').innerHTML = UYG.filter(u => u.pop).map(kart).join('');
+const ES = [['ÖRNEKLEME VE VERİ TOPLAMA', ['01', '02']], ['BETİMSEL İSTATİSTİK', ['03', '04', '06']], ['İLİŞKİLER VE MODELLEME', ['05', '08', '09']], ['OLASILIK', ['07', '10']], ['İSTATİSTİKSEL ÇIKARIM', ['11', '12', '13']]];
+document.getElementById('eslesme').innerHTML = ES.map(([b, l]) => `<div class="kart"><div class="e">${b}</div>${l.map(n => `<a href="uygulamalar/${bul(n).dosya}">${bul(n).ad}</a>`).join('')}<div class="r">Uygulama ${l.join(', ')}</div></div>`).join('');
+document.getElementById('ara').addEventListener('input', e => modulleriCiz(e.target.value));
+modulleriCiz();
+function yonlendir() {
+  let h = location.hash.replace('#', '') || 'ana'; let modul = null;
+  if (h.startsWith('modul-')) { modul = h; h = 'uygulamalar'; }
+  if (!document.getElementById('g-' + h)) h = 'ana';
+  document.querySelectorAll('.gorunum').forEach(g => g.classList.toggle('aktif', g.id === 'g-' + h));
+  document.querySelectorAll('nav.ana-menu a').forEach(a => a.classList.toggle('aktif', a.dataset.g === h));
+  if (modul) { const m = document.getElementById(modul); if (m) m.scrollIntoView({behavior: 'smooth'}); } else window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', yonlendir); yonlendir();
+</script>
+</body>
+</html>
