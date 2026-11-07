@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korelasyon ve Saçılım Grafiği · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .r-buyuk{font-family:var(--mono);font-size:46px;font-weight:800;color:var(--mavi);line-height:1.1}
+  .guc{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.08em;padding:3px 8px;border-radius:5px;background:var(--mavi-acik);color:var(--mavi)}
+  .on-ayar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .on-ayar .btn{text-align:left;font-size:12.5px}
+  .tahmin-kutu{background:#f7f7f6;border:1px solid var(--kenar);border-radius:12px;text-align:center;padding:14px}
+  .tahmin-kutu .d{font-family:var(--mono);font-size:40px;font-weight:800;color:var(--mavi)}
+  .olcut{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .olcut .btn{padding:6px 2px;font-family:var(--mono);font-size:12px;text-align:center;line-height:1.2}
+  .olcut .btn span{display:block;font-family:inherit;font-size:10px;color:var(--soluk)}
+  .olcut .btn.aktif span{color:#cfe0f5}
+  .sonuc{border-radius:12px;padding:14px;font-size:13.5px;line-height:1.5}
+  #svg1{cursor:crosshair}
+  .tuval-ust{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;color:var(--soluk);margin-bottom:6px;flex-wrap:wrap;gap:8px}
+  .alt-serit{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--soluk);margin-top:6px;flex-wrap:wrap;gap:6px}
+  .alt-serit b{color:var(--mavi)}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Korelasyon ve Saçılım Grafiği</h1></a>
+  <div class="sag-ust">
+    <nav class="sekmeler"><button class="sekme aktif" data-hedef="p1">▷ Sekme 1: Oyna ve Keşfet</button><button class="sekme" data-hedef="p2">🏆 Sekme 2: Tahmin Oyunu</button></nav>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+
+<main class="icerik">
+  <!-- ============ SEKME 1 ============ -->
+  <section class="panel aktif" id="p1">
+    <div class="izgara" style="grid-template-columns:340px 1fr">
+      <div class="yigin">
+        <section class="kart">
+          <div class="bas"><p class="kb" style="margin:0">Korelasyon Katsayısı</p><span class="rozet r-gri" id="nNokta">N = 0 NOKTA</span></div>
+          <div class="r-buyuk" id="rDeger">—</div>
+          <div style="font-size:13px;margin:4px 0 10px">Güç: <span class="guc" id="guc">—</span></div>
+          <div class="hesap">
+            <div class="satir"><span>Regresyon doğrusu:</span><b id="denklem" style="color:var(--kirmizi)">—</b></div>
+            <div class="satir"><span>Belirleme katsayısı r²:</span><b id="r2">—</b></div>
+            <div class="satir"><span>Ortalama noktası (x̄, ȳ):</span><b id="ortNokta">—</b></div>
+          </div>
+        </section>
+        <section class="kart">
+          <p class="kb">⚙ Laboratuvar Denetimleri</p>
+          <div class="btn-grup"><button class="btn kirmizi" id="aykiriBtn">⊕ Aykırı Değer Ekle</button><button class="btn" id="temizleBtn">🗑 Temizle</button></div>
+          <label class="onay" style="margin-top:10px"><input type="checkbox" id="dogru">En iyi uyum doğrusunu göster (ŷ = b₀ + b₁x)</label>
+          <label class="onay"><input type="checkbox" id="ortCizgi">Ortalama çizgilerini göster (x̄, ȳ)</label>
+          <label class="onay"><input type="checkbox" id="artik">Artıkları göster (en küçük kareler hataları)</label>
+          <label class="onay"><input type="checkbox" id="ceyrek">Dörtte bir bölgelerini renklendir (+/− katkılar)</label>
+        </section>
+        <section class="kart">
+          <p class="kb">↗ Sınıf İçi Hazır Şablonlar</p>
+          <div class="on-ayar">
+            <button class="btn" data-sab="0.9">📈 Güçlü pozitif (r ≈ 0,90)</button>
+            <button class="btn" data-sab="-0.9">📉 Güçlü negatif (r ≈ −0,90)</button>
+            <button class="btn" data-sab="0">⚪ Sıfır korelasyon (r ≈ 0)</button>
+            <button class="btn" data-sab="u">🔄 İkinci derece U (r ≈ 0)</button>
+            <button class="btn" data-sab="0.5">↗ Orta pozitif (r ≈ 0,50)</button>
+            <button class="btn" data-sab="kume">⚠ İki küme (yanıltıcı r)</button>
+          </div>
+        </section>
+      </div>
+      <section class="kart">
+        <div class="tuval-ust"><span>Y EKSENİ ARALIĞI [0–100]</span><div class="lejant"><span><i style="background:#0b4a8b"></i>Veri noktası</span><span><i style="background:#c8202e"></i>Aykırı değer</span></div></div>
+        <div class="not kirmizi" style="padding:7px 12px;font-size:12.5px;margin-bottom:8px">● Boş alana tıklayarak nokta ekleyin. Noktaları sürükleyerek taşıyın. Bir noktaya (sürüklemeden) tıklarsanız silinir.</div>
+        <div class="tuval" id="tuval1"><button class="buyut" data-tuval="tuval1"></button><svg id="svg1" viewBox="0 0 640 560"></svg></div>
+        <div class="alt-serit"><span>ORİJİN: (0, 0)</span><span>AĞIRLIK MERKEZİ: <b id="agirlik">—</b></span><span>MAKS: (100, 100)</span></div>
+        <div class="icgoru" style="margin-top:12px"><span class="et">YORUM</span><div id="yorum1"></div></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============ SEKME 2 ============ -->
+  <section class="panel" id="p2">
+    <div class="izgara" style="grid-template-columns:340px 1fr">
+      <div class="yigin">
+        <div class="izgara-3" style="grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="gosterge" style="text-align:center"><div class="e">Tur</div><div class="d" id="tur">1</div></div>
+          <div class="gosterge" style="text-align:center"><div class="e">🔥 Seri</div><div class="d" id="seri" style="color:var(--turuncu)">0</div></div>
+          <div class="gosterge" style="text-align:center"><div class="e">Ort. hata</div><div class="d" id="ortHata">0,00</div></div>
+        </div>
+        <section class="kart">
+          <div class="bas"><p class="kb" style="margin:0">◎ Tahmininiz</p><button class="btn" id="ses" style="padding:3px 8px;font-size:11px">🔊 SES AÇIK</button></div>
+          <div class="tahmin-kutu" style="margin-top:10px"><div class="ipucu-k" style="font-weight:800;letter-spacing:.1em">ETKİN TAHMİN</div><div class="d" id="tahminD">+0,00</div><div class="ipucu-k" id="tahminAcik"></div></div>
+          <input type="range" id="tahmin" min="-1" max="1" step="0.01" value="0" style="margin-top:12px">
+          <div class="olcek"><span>−1,00 (tam negatif)</span><span>0,00</span><span>+1,00 (tam pozitif)</span></div>
+          <p class="acik" style="margin-bottom:6px">HIZLI REFERANS DEĞERLERİ:</p>
+          <div class="olcut" id="olcut">
+            <button class="btn" data-v="-0.9">−0,9<span>Güçlü</span></button><button class="btn" data-v="-0.4">−0,4<span>Orta</span></button><button class="btn aktif" data-v="0">0,0<span>Sıfır</span></button><button class="btn" data-v="0.4">+0,4<span>Orta</span></button><button class="btn" data-v="0.9">+0,9<span>Güçlü</span></button>
+          </div>
+          <button class="btn kirmizi tam" id="gonder" style="margin-top:14px;padding:13px;font-size:15px">⊙ Tahmini Gönder</button>
+          <div class="sonuc gizli" id="sonuc" style="margin-top:12px"></div>
+        </section>
+      </div>
+      <section class="kart">
+        <div class="tuval-ust"><span>Y EKSENİ ARALIĞI [0–100]</span></div>
+        <div class="not mavi" id="arena" style="padding:8px 12px;font-family:var(--serif);font-weight:700;color:var(--mavi)">Tahmin Arenası: Noktalar üretildi. Korelasyon katsayısı tahmininizi gönderin!</div>
+        <div class="tuval" style="margin-top:8px"><svg id="svg2" viewBox="0 0 640 560"></svg></div>
+        <div id="gecmis" class="ipucu-k" style="margin-top:10px"></div>
+      </section>
+    </div>
+  </section>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 08 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  const W = 640, H = 560, L = 56, R = 18, T = 18, B = 52;
+  const sx = I.olcek(0, 100, L, W - R), sy = I.olcek(0, 100, H - B, T);
+  const sinir = v => Math.max(1, Math.min(99, v));
+  const gucEt = r => { const a = Math.abs(r); const yon = r > 0 ? 'POZİTİF' : 'NEGATİF';
+    return a >= .8 ? 'GÜÇLÜ ' + yon : a >= .5 ? 'ORTA ' + yon : a >= .3 ? 'ZAYIF ' + yon : 'ÇOK ZAYIF / YOK'; };
+  function uret(r, n = 40) { // hedef r'ye yakın noktalar
+    const xs = [], ys = [];
+    for (let i = 0; i < n; i++) xs.push(10 + 80 * Math.random());
+    const mx = I.ort(xs), s = I.sd(xs);
+    xs.forEach(x => ys.push(50 + 17 * (r * (x - mx) / s + Math.sqrt(Math.max(0, 1 - r * r)) * I.rnorm())));
+    return xs.map((x, i) => ({x: sinir(x), y: sinir(ys[i]), a: false}));
+  }
+  function istat(p) {
+    if (p.length < 2) return null; const x = p.map(q => q.x), y = p.map(q => q.y);
+    const r = I.korelasyon(x, y); const {b0, b1} = I.dogrusal(x, y);
+    return {r: isFinite(r) ? r : NaN, b0, b1, mx: I.ort(x), my: I.ort(y)};
+  }
+  function zemin(svg) {
+    const g = el('g', {}, svg);
+    [0, 20, 40, 60, 80, 100].forEach(t => {
+      el('line', {x1: sx(t), x2: sx(t), y1: sy(0), y2: sy(100), stroke: '#ececec'}, g); el('line', {y1: sy(t), y2: sy(t), x1: sx(0), x2: sx(100), stroke: '#ececec'}, g);
+      el('text', {x: sx(t), y: sy(0) + 18, 'text-anchor': 'middle', 'font-size': 11, fill: '#666', class: 'svg-yazi'}, g, t);
+      el('text', {x: sx(0) - 8, y: sy(t) + 4, 'text-anchor': 'end', 'font-size': 11, fill: '#666', class: 'svg-yazi'}, g, t); });
+    el('rect', {x: sx(0), y: sy(100), width: sx(100) - sx(0), height: sy(0) - sy(100), fill: 'none', stroke: '#999'}, g);
+    el('text', {x: (sx(0) + sx(100)) / 2, y: H - 10, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, 'font-style': 'italic', fill: '#333'}, g, 'Bağımsız değişken (X)');
+    el('text', {x: 16, y: (sy(0) + sy(100)) / 2, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, 'font-style': 'italic', fill: '#333', transform: `rotate(-90 16 ${(sy(0) + sy(100)) / 2})`}, g, 'Bağımlı değişken (Y)');
+  }
+  const dogruCiz = (svg, s, renk = '#c8202e') => { const y0 = s.b0, y1 = s.b0 + 100 * s.b1;
+    el('line', {x1: sx(0), y1: sy(y0), x2: sx(100), y2: sy(y1), stroke: renk, 'stroke-width': 2.5}, svg); };
+
+  // ============ SEKME 1 ============
+  let P = uret(.95, 6).sort((a, b) => a.x - b.x);
+  P = [{x: 15, y: 22}, {x: 30, y: 33}, {x: 45, y: 38}, {x: 60, y: 55}, {x: 75, y: 62}, {x: 85, y: 80}].map(p => ({...p, a: false}));
+  const svg1 = $('svg1'); let surukle = null, hareket = false;
+  function ciz1() {
+    svg1.innerHTML = ''; zemin(svg1); const s = istat(P);
+    $('nNokta').textContent = `N = ${P.length} NOKTA`;
+    if (s && isFinite(s.r)) {
+      if ($('ceyrek').checked) {
+        el('rect', {x: sx(s.mx), y: sy(100), width: sx(100) - sx(s.mx), height: sy(s.my) - sy(100), fill: 'rgba(20,150,111,.08)'}, svg1);
+        el('rect', {x: sx(0), y: sy(s.my), width: sx(s.mx) - sx(0), height: sy(0) - sy(s.my), fill: 'rgba(20,150,111,.08)'}, svg1);
+        el('rect', {x: sx(0), y: sy(100), width: sx(s.mx) - sx(0), height: sy(s.my) - sy(100), fill: 'rgba(200,32,46,.07)'}, svg1);
+        el('rect', {x: sx(s.mx), y: sy(s.my), width: sx(100) - sx(s.mx), height: sy(0) - sy(s.my), fill: 'rgba(200,32,46,.07)'}, svg1);
+        [[75, 92, '+'], [25, 8, '+'], [25, 92, '−'], [75, 8, '−']].forEach(([a, b, t]) => el('text', {x: sx(a), y: sy(b), 'text-anchor': 'middle', 'font-size': 26, 'font-weight': 800, fill: t === '+' ? '#14966f' : '#c8202e', opacity: .5}, svg1, t));
+      }
+      if ($('ortCizgi').checked) {
+        el('line', {x1: sx(s.mx), x2: sx(s.mx), y1: sy(0), y2: sy(100), stroke: '#0b4a8b', 'stroke-dasharray': '5 4'}, svg1);
+        el('line', {y1: sy(s.my), y2: sy(s.my), x1: sx(0), x2: sx(100), stroke: '#0b4a8b', 'stroke-dasharray': '5 4'}, svg1);
+        el('text', {x: sx(s.mx) + 4, y: sy(100) + 12, 'font-size': 11, fill: '#0b4a8b', 'font-weight': 700}, svg1, 'x̄'); el('text', {x: sx(100) - 12, y: sy(s.my) - 4, 'font-size': 11, fill: '#0b4a8b', 'font-weight': 700}, svg1, 'ȳ');
+      }
+      if ($('artik').checked) P.forEach(p => el('line', {x1: sx(p.x), x2: sx(p.x), y1: sy(p.y), y2: sy(s.b0 + s.b1 * p.x), stroke: '#d97706', 'stroke-width': 1.8, 'stroke-dasharray': '3 2'}, svg1));
+      if ($('dogru').checked) dogruCiz(svg1, s);
+      el('circle', {cx: sx(s.mx), cy: sy(s.my), r: 6, fill: 'none', stroke: '#0b4a8b', 'stroke-width': 2}, svg1);
+    }
+    P.forEach((p, i) => { const c = el('circle', {cx: sx(p.x), cy: sy(p.y), r: 8, fill: p.a ? '#c8202e' : '#0b4a8b', stroke: '#fff', 'stroke-width': 2, style: 'cursor:grab'}, svg1); c.dataset.i = i; });
+    if (s && isFinite(s.r)) {
+      $('rDeger').textContent = I.isaretli(s.r, 4); $('guc').textContent = gucEt(s.r);
+      $('denklem').textContent = `ŷ = ${f(s.b0, 2)} ${s.b1 < 0 ? '−' : '+'} ${f(Math.abs(s.b1), 2)}x`; $('r2').textContent = f(s.r * s.r, 4);
+      $('ortNokta').textContent = $('agirlik').textContent = `(${f(s.mx, 1)}; ${f(s.my, 1)})`;
+      const ayk = P.filter(p => p.a).length;
+      $('yorum1').innerHTML = `r = ${f(s.r, 3)}: X ile Y arasında <b>${gucEt(s.r).toLowerCase()}</b> doğrusal ilişki. r² = ${f(s.r * s.r, 3)} → Y'deki değişkenliğin yaklaşık <b>${I.yz(s.r * s.r, 0)}</b>'i X ile doğrusal olarak açıklanır.` +
+        (ayk ? ` <b style="color:var(--kirmizi)">${ayk} aykırı değer</b> var — tek bir uç noktanın r'yi nasıl değiştirdiğine dikkat edin!` : '') +
+        (Math.abs(s.r) < .3 ? ' Not: r ≈ 0 ilişki olmadığı anlamına gelmez; yalnızca <i>doğrusal</i> ilişki olmadığını gösterir (U şablonunu deneyin).' : '');
+    } else { $('rDeger').textContent = '—'; $('guc').textContent = '—'; $('denklem').textContent = '—'; $('r2').textContent = '—'; $('ortNokta').textContent = $('agirlik').textContent = '—';
+      $('yorum1').textContent = 'r hesaplamak için en az iki (aynı dikey çizgide olmayan) nokta gerekir.'; }
+  }
+  const svgNokta = e => { const pt = svg1.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg1.getScreenCTM().inverse()); return {x: sx.ters(p.x), y: sy.ters(p.y)}; };
+  svg1.addEventListener('pointerdown', e => { const i = e.target.dataset && e.target.dataset.i; if (i !== undefined) { surukle = +i; hareket = false; svg1.setPointerCapture(e.pointerId); } });
+  svg1.addEventListener('pointermove', e => { if (surukle === null) return; const p = svgNokta(e); hareket = true; P[surukle].x = sinir(p.x); P[surukle].y = sinir(p.y); ciz1(); });
+  svg1.addEventListener('pointerup', e => {
+    if (surukle !== null) { if (!hareket) P.splice(surukle, 1); surukle = null; ciz1(); return; }
+    const p = svgNokta(e); if (p.x < 0 || p.x > 100 || p.y < 0 || p.y > 100) return; P.push({x: p.x, y: p.y, a: false}); ciz1(); });
+  $('aykiriBtn').addEventListener('click', () => { const s = istat(P); const ust = !s || s.b1 >= 0; P.push({x: ust ? 92 : 92, y: ust ? 8 : 92, a: true}); ciz1(); });
+  $('temizleBtn').addEventListener('click', () => { P = []; ciz1(); });
+  ['dogru', 'ortCizgi', 'artik', 'ceyrek'].forEach(id => $(id).addEventListener('change', ciz1));
+  document.querySelectorAll('[data-sab]').forEach(b => b.addEventListener('click', () => { const v = b.dataset.sab;
+    if (v === 'u') { P = []; for (let i = 0; i < 30; i++) { const x = 8 + 84 * i / 29; P.push({x, y: sinir(15 + 0.03 * (x - 50) ** 2 + 4 * I.rnorm()), a: false}); } }
+    else if (v === 'kume') { P = []; for (let i = 0; i < 18; i++) P.push({x: sinir(20 + 6 * I.rnorm()), y: sinir(22 + 6 * I.rnorm()), a: false}); for (let i = 0; i < 18; i++) P.push({x: sinir(78 + 6 * I.rnorm()), y: sinir(78 + 6 * I.rnorm()), a: false}); }
+    else P = uret(+v, 35);
+    ciz1(); }));
+  ciz1();
+
+  // ============ SEKME 2 ============
+  let tur = 1, seri = 0, hatalar = [], G = [], gercek = 0, cevaplandi = false, sesAcik = true, gecmis = [];
+  const svg2 = $('svg2');
+  function yeniTur() { gercek = 0; let t; const hedef = Math.round((Math.random() * 2 - 1) * 100) / 100;
+    for (let k = 0; k < 5; k++) { t = uret(hedef, 30 + Math.floor(Math.random() * 30)); gercek = istat(t).r; if (Math.abs(gercek - hedef) < .08) break; }
+    G = t; cevaplandi = false; $('sonuc').classList.add('gizli'); $('gonder').textContent = '⊙ Tahmini Gönder';
+    $('arena').textContent = 'Tahmin Arenası: Noktalar üretildi. Korelasyon katsayısı tahmininizi gönderin!'; ciz2(); }
+  function ciz2() { svg2.innerHTML = ''; zemin(svg2);
+    if (cevaplandi) dogruCiz(svg2, istat(G), '#14966f');
+    G.forEach(p => el('circle', {cx: sx(p.x), cy: sy(p.y), r: 7, fill: '#0b4a8b', stroke: '#fff', 'stroke-width': 1.5}, svg2)); }
+  function tahminGoster() { const v = +$('tahmin').value; $('tahminD').textContent = I.isaretli(v, 2);
+    const a = Math.abs(v); $('tahminAcik').textContent = a >= .8 ? (v > 0 ? 'Güçlü pozitif (dar, yukarı doğru bant)' : 'Güçlü negatif (dar, aşağı doğru bant)') : a >= .5 ? 'Orta düzeyde ' + (v > 0 ? 'pozitif' : 'negatif') : a >= .2 ? 'Zayıf ' + (v > 0 ? 'pozitif' : 'negatif') : 'Sıfıra yakın (yuvarlak bulut / ilişkisiz)';
+    document.querySelectorAll('#olcut .btn').forEach(b => b.classList.toggle('aktif', Math.abs(+b.dataset.v - v) < .005)); }
+  function bip(iyi) { if (!sesAcik) return; try { const c = new (window.AudioContext || window.webkitAudioContext)(); const o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = iyi ? 880 : 220; o.type = iyi ? 'sine' : 'square'; g.gain.value = .06; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + (iyi ? .18 : .3)); } catch (e) {} }
+  $('tahmin').addEventListener('input', tahminGoster);
+  document.querySelectorAll('#olcut .btn').forEach(b => b.addEventListener('click', () => { $('tahmin').value = b.dataset.v; tahminGoster(); }));
+  $('ses').addEventListener('click', () => { sesAcik = !sesAcik; $('ses').textContent = sesAcik ? '🔊 SES AÇIK' : '🔇 SES KAPALI'; });
+  $('gonder').addEventListener('click', () => {
+    if (cevaplandi) { tur++; $('tur').textContent = tur; yeniTur(); return; }
+    const t = +$('tahmin').value, hata = Math.abs(t - gercek); hatalar.push(hata); cevaplandi = true;
+    const iyi = hata <= .1; seri = iyi ? seri + 1 : 0; bip(iyi);
+    $('seri').textContent = seri; $('ortHata').textContent = f(I.ort(hatalar), 2);
+    const s = $('sonuc'); s.classList.remove('gizli');
+    s.style.background = iyi ? 'var(--yesil-acik)' : hata <= .25 ? 'var(--turuncu-acik)' : 'var(--kirmizi-acik)';
+    s.innerHTML = `<b style="font-size:16px">${iyi ? '🎯 Harika!' : hata <= .25 ? '👍 Yakın!' : '❌ Uzak kaldı'}</b><br>Gerçek r = <b>${I.isaretli(gercek, 2)}</b>, tahmininiz ${I.isaretli(t, 2)} → hata ${f(hata, 2)}.`;
+    $('arena').textContent = `Gerçek korelasyon: r = ${I.isaretli(gercek, 3)} — yeşil çizgi en küçük kareler doğrusudur.`;
+    $('gonder').textContent = '→ Sonraki Tur';
+    gecmis.unshift(`Tur ${tur}: gerçek ${I.isaretli(gercek, 2)} · tahmin ${I.isaretli(t, 2)} · hata ${f(hata, 2)}`);
+    $('gecmis').innerHTML = '<b>Geçmiş:</b> ' + gecmis.slice(0, 6).join(' &nbsp;|&nbsp; ');
+    ciz2(); });
+  tahminGoster(); yeniTur();
+})();
+</script>
+</body>
+</html>

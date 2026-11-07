@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Örnekleme Dağılımı ve Güven Aralığı · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .ana{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start}
+  @media (max-width:980px){.ana{grid-template-columns:1fr}}
+  .ozet-kart{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--kenar);border-radius:14px;padding:14px}
+  .ozet-kart .ik{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
+  .ozet-kart .e{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--soluk)}
+  .ozet-kart .d{font-family:var(--mono);font-size:26px;font-weight:800}
+  .ozet-kart .a{font-size:11px;color:var(--soluk)}
+  .tahmin-kutu{position:absolute;pointer-events:none;background:#1d2433;color:#fff;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.55;font-family:var(--mono);box-shadow:0 8px 20px rgba(0,0,0,.25);display:none;z-index:5;min-width:200px}
+  .kural .btn{text-align:left;line-height:1.3}
+  .kural .btn span{display:block;font-size:11px;opacity:.75;font-weight:500}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Örnekleme Dağılımı ve Güven Aralığı</h1></a>
+  <div class="sag-ust">
+    <nav class="sekmeler"><button class="sekme aktif" data-hedef="oran">Oran (p)</button><button class="sekme" data-hedef="ort">Ortalama (μ)</button></nav>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+<div class="gizli"><div class="panel" id="oran"></div><div class="panel" id="ort"></div></div>
+
+<main class="icerik">
+  <div class="ana">
+    <aside class="kart">
+      <p class="kb">⫼ Simülasyon Denetimi</p>
+      <div class="blok" id="oranAyar">
+        <p class="acik" style="margin:0 0 6px;font-weight:800;letter-spacing:.06em;font-size:11px">POPÜLASYON PARAMETRESİ</p>
+        <div class="bas"><span style="font-size:13px;font-weight:700">Gerçek oran (p)</span><span class="rozet r-mavi" id="pR">0,50</span></div>
+        <input type="range" id="p" min="0.05" max="0.95" step="0.01" value="0.5"><div class="olcek"><span>p = 0,05</span><span>0,50 (adil)</span><span>0,95</span></div>
+      </div>
+      <div class="blok gizli" id="ortAyar">
+        <p class="acik" style="margin:0 0 6px;font-weight:800;letter-spacing:.06em;font-size:11px">POPÜLASYON PARAMETRELERİ</p>
+        <div class="bas"><span style="font-size:13px;font-weight:700">Gerçek ortalama (μ)</span><span class="rozet r-mavi" id="muR">100,0</span></div>
+        <input type="range" id="mu" min="50" max="150" step="1" value="100"><div class="olcek"><span>μ = 50,0</span><span>100,0</span><span>150,0</span></div>
+        <div class="bas" style="margin-top:10px"><span style="font-size:13px;font-weight:700">Gerçek std. sapma (σ)</span><span class="rozet r-mavi" id="sigR">15,0</span></div>
+        <input type="range" id="sig" min="5" max="50" step="1" value="15"><div class="olcek"><span>σ = 5,0</span><span>25,0</span><span>50,0</span></div>
+        <p class="acik" style="margin:12px 0 6px;font-weight:800;letter-spacing:.06em;font-size:11px">GÜVEN ARALIĞI KURALI</p>
+        <div class="btn-grup kural"><button class="btn aktif" data-kural="t">t-aralığı<span>s tahmin edilir</span></button><button class="btn" data-kural="z">z-aralığı<span>σ bilinir</span></button></div>
+      </div>
+      <div class="blok">
+        <p class="acik" style="margin:0 0 6px;font-weight:800;letter-spacing:.06em;font-size:11px">ÖRNEKLEM BÜYÜKLÜĞÜ</p>
+        <div class="bas"><span style="font-size:13px;font-weight:700">Örneklem büyüklüğü (n)</span><span class="rozet r-gri" id="nR">n = 100</span></div>
+        <input type="range" id="n" min="10" max="500" step="5" value="100">
+      </div>
+      <div class="blok">
+        <p class="acik" style="margin:0 0 6px;font-weight:800;letter-spacing:.06em;font-size:11px">GÜVEN DÜZEYİ (C)</p>
+        <div class="btn-grup" id="cSec"><button class="btn" data-c="0.90">%90</button><button class="btn aktif" data-c="0.95">%95</button><button class="btn" data-c="0.99">%99</button></div>
+        <p class="acik" style="text-align:center;font-style:italic" id="kritik"></p>
+      </div>
+      <div class="btn-grup"><button class="btn birincil" id="b1">1 Örneklem Çek</button><button class="btn yesil" id="b10">10 Örneklem</button></div>
+      <button class="btn kirmizi tam" id="b100" style="margin-top:8px">100 Örneklem Simüle Et</button>
+      <button class="btn tam" id="bSifir" style="margin-top:8px">Grafiği ve Kaydı Sıfırla</button>
+    </aside>
+
+    <div class="yigin">
+      <div class="izgara-3">
+        <div class="ozet-kart"><div class="ik" style="background:var(--mavi-acik)">◎</div><div><div class="e">TOPLAM ÖRNEKLEM</div><div class="d" id="toplam">0</div><div class="a">Çizilen güven aralığı sayısı</div></div></div>
+        <div class="ozet-kart"><div class="ik" style="background:var(--yesil-acik)">✓</div><div><div class="e">PARAMETREYİ YAKALAYAN</div><div class="d" id="yakalanan" style="color:var(--yesil)">0</div><div class="a" id="yakAcik">İlk örneklem bekleniyor…</div></div></div>
+        <div class="ozet-kart"><div class="ik" style="background:var(--turuncu-acik)">🏅</div><div><div class="e">GÖZLENEN KAPSAMA ORANI</div><div class="d" id="kapsama">%0,0</div><div class="a" id="kapAcik">Çok sayıda örneklem çekin</div></div></div>
+      </div>
+      <section class="kart">
+        <div class="grafik-ust"><div><p class="kb">≋ Güven Aralığı Yakalama Alanı</p><div class="acik">Her yatay çizgi bir örneklemden hesaplanan güven aralığıdır (en yenisi en üstte). Üzerine gelerek ayrıntıları görün.</div></div></div>
+        <div class="tuval" id="tuval" style="position:relative"><button class="buyut" data-tuval="tuval"></button><svg id="svg" viewBox="0 0 900 520"></svg><div class="tahmin-kutu" id="ipucu"></div></div>
+        <div class="lejant" style="margin-top:10px"><span><i class="cizgi" style="background:#14966f"></i>Aralık parametreyi yakalıyor (başarı)</span><span><i class="cizgi" style="background:#c8202e"></i>Aralık parametreyi kaçırıyor (hata)</span><span><i style="background:#fff;border:2px solid #1d2433"></i>Örneklem nokta tahmini (p̂ ya da x̄)</span></div>
+      </section>
+      <div class="izgara-2">
+        <section class="kart"><p class="kb">Nokta Tahminlerinin Örnekleme Dağılımı</p><svg id="svgH" viewBox="0 0 440 220"></svg><p class="ipucu-k" id="shAcik"></p></section>
+        <div class="not mavi" id="ders"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 11 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  let mod = 'oran', C = 0.95, kural = 't', K = [];
+  const n = () => +$('n').value;
+  function kritikDeger() { return mod === 'ort' && kural === 't' ? I.tInv(1 - (1 - C) / 2, n() - 1) : I.invPhi(1 - (1 - C) / 2); }
+  function parametre() { return mod === 'oran' ? +$('p').value : +$('mu').value; }
+  function cek() {
+    const nn = n(); let tah, se;
+    if (mod === 'oran') { const p = +$('p').value; let x = 0; for (let i = 0; i < nn; i++) if (Math.random() < p) x++; tah = x / nn; se = Math.sqrt(tah * (1 - tah) / nn); }
+    else { const mu = +$('mu').value, s = +$('sig').value; const d = []; for (let i = 0; i < nn; i++) d.push(mu + s * I.rnorm());
+      tah = I.ort(d); const ss = I.sd(d); se = (kural === 't' ? ss : s) / Math.sqrt(nn); var sDeg = ss; }
+    const k = kritikDeger(), me = k * se, alt = tah - me, ust = tah + me, par = parametre();
+    K.push({tah, se, me, alt, ust, k, s: sDeg, yakala: alt <= par && par <= ust, n: nn, mod});
+  }
+  function guncelle() {
+    $('pR').textContent = f(+$('p').value, 2); $('muR').textContent = f(+$('mu').value, 1); $('sigR').textContent = f(+$('sig').value, 1); $('nR').textContent = 'n = ' + n();
+    const k = kritikDeger(); $('kritik').textContent = mod === 'ort' && kural === 't' ? `Kritik değer t* = ${f(k, 4)} (sd = ${n() - 1})` : `Kritik değer z* = ${f(k, 4)}`;
+    const y = K.filter(a => a.yakala).length;
+    $('toplam').textContent = K.length; $('yakalanan').textContent = y;
+    $('yakAcik').textContent = K.length ? `${K.length - y} aralık parametreyi kaçırdı` : 'İlk örneklem bekleniyor…';
+    $('kapsama').textContent = K.length ? I.yz(y / K.length) : '%0,0';
+    $('kapsama').style.color = !K.length ? '' : Math.abs(y / K.length - C) < .03 ? 'var(--yesil)' : 'var(--turuncu)';
+    $('kapAcik').textContent = K.length ? `Hedef güven düzeyi: %${f(C * 100, 0)}` : 'Çok sayıda örneklem çekin';
+    $('bSifir').disabled = !K.length;
+    const kuramSE = mod === 'oran' ? Math.sqrt(+$('p').value * (1 - +$('p').value) / n()) : +$('sig').value / Math.sqrt(n());
+    $('ders').innerHTML = `<b>Yorum:</b> "%${f(C * 100, 0)} güven", tek bir aralığın parametreyi %${f(C * 100, 0)} olasılıkla içerdiği anlamına <b>gelmez</b> — bir aralık ya içerir ya içermez. Anlamı, <b>bu yöntemin</b> uzun dönemde aralıkların yaklaşık %${f(C * 100, 0)}'ini başarılı kılmasıdır.<br><br>` +
+      (mod === 'oran' ? `Aralık: p̂ ± z*·√(p̂(1−p̂)/n). ` : kural === 't' ? `Aralık: x̄ ± t*·s/√n (σ bilinmediği için s kullanılır; t* > z*). ` : `Aralık: x̄ ± z*·σ/√n (σ bilindiği varsayılır). `) +
+      `Kuramsal standart hata = <b>${f(kuramSE, 4)}</b>. Güven düzeyini artırmak aralığı <b>genişletir</b>; n'yi artırmak <b>daraltır</b>.` +
+      (mod === 'oran' && (n() * +$('p').value < 10 || n() * (1 - +$('p').value) < 10) ? '<br><br><b style="color:var(--kirmizi)">⚠ np ≥ 10 ve n(1−p) ≥ 10 koşulu sağlanmıyor:</b> normal yaklaşım zayıf, gerçek kapsama nominal düzeyin altında kalabilir.' : '') +
+      (mod === 'ort' && kural === 'z' && false ? '' : '');
+    ciz(); hist(kuramSE);
+  }
+  function ciz() {
+    const svg = $('svg'); svg.innerHTML = ''; const W = 900, H = 520, L = 30, R = 24, T = 30, B = 44;
+    const par = parametre();
+    const [lo, hi] = mod === 'oran' ? [0, 1] : [par - 4 * +$('sig').value / Math.sqrt(Math.max(10, n())) * 2.2, par + 4 * +$('sig').value / Math.sqrt(Math.max(10, n())) * 2.2];
+    const x = I.olcek(lo, hi, L, W - R), xt = mod === 'oran' ? [0, .25, .5, .75, 1] : I.tikler(lo, hi, 8);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y: v => v, xt, yt: [], xIzgara: true, yEksen: false, izgara: false, xBicim: mod === 'oran' ? v => '%' + f(v * 100, 0) : null});
+    xt.forEach(v => el('text', {x: x(v), y: T - 10, 'text-anchor': 'middle', 'font-size': 11, fill: '#999', class: 'svg-yazi'}, svg, mod === 'oran' ? '%' + f(v * 100, 0) : f(v, I.ondalik(xt))));
+    el('line', {x1: x(par), x2: x(par), y1: T - 4, y2: H - B, stroke: '#0b4a8b', 'stroke-width': 2, 'stroke-dasharray': '6 4'}, svg);
+    I.etiket(svg, x(par), H - B + 2, mod === 'oran' ? `Gerçek oran p = ${f(par, 2)}` : `Gerçek ortalama μ = ${f(par, 1)}`, '#0b4a8b');
+    if (!K.length) {
+      el('text', {x: W / 2, y: H / 2 - 10, 'text-anchor': 'middle', 'font-family': 'Georgia,serif', 'font-size': 18, 'font-weight': 700, fill: '#1d2433'}, svg, 'Henüz güven aralığı çizilmedi');
+      el('text', {x: W / 2, y: H / 2 + 16, 'text-anchor': 'middle', 'font-size': 13, fill: '#666'}, svg, 'Soldaki parametreleri ayarlayın, ardından "1 Örneklem Çek" ya da "100 Örneklem Simüle Et"e tıklayın.');
+      return; }
+    const goster = K.slice(-100).reverse(), h = (H - T - B - 10) / Math.max(goster.length, 25);
+    goster.forEach((a, i) => { const yy = T + 4 + i * h + h / 2, renk = a.yakala ? '#14966f' : '#c8202e';
+      const g = el('g', {style: 'cursor:pointer'}, svg); g.dataset.i = K.length - 1 - i;
+      el('rect', {x: L, y: yy - h / 2, width: W - L - R, height: h, fill: 'transparent'}, g);
+      el('line', {x1: x(Math.max(lo, a.alt)), x2: x(Math.min(hi, a.ust)), y1: yy, y2: yy, stroke: renk, 'stroke-width': Math.max(1.5, Math.min(5, h * .55)), 'stroke-linecap': 'round', opacity: i === 0 ? 1 : .85}, g);
+      el('circle', {cx: x(a.tah), cy: yy, r: Math.max(2, Math.min(4.5, h * .4)), fill: '#fff', stroke: '#1d2433', 'stroke-width': 1.5}, g);
+      if (i === 0) el('text', {x: x(Math.min(hi, a.ust)) + 8, y: yy + 4, 'font-size': 11, 'font-weight': 700, fill: renk}, g, 'en yeni'); });
+  }
+  function hist(kuramSE) {
+    const svg = $('svgH'); svg.innerHTML = ''; const W = 440, H = 220, L = 34, R = 10, T = 10, B = 34; const par = parametre();
+    const lo = par - 4 * kuramSE, hi = par + 4 * kuramSE, x = I.olcek(lo, hi, L, W - R), k = 24, g = (hi - lo) / k, kutu = new Array(k).fill(0);
+    const tah = K.filter(a => a.n === n()).map(a => a.tah); tah.forEach(v => { const i = Math.floor((v - lo) / g); if (i >= 0 && i < k) kutu[i]++; });
+    const yogMaks = 1 / (kuramSE * Math.sqrt(2 * Math.PI)), olc = tah.length ? Math.max(Math.max(...kutu) / (tah.length * g), yogMaks) : yogMaks;
+    const y = I.olcek(0, olc * 1.1, H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y: v => v, xt: I.tikler(lo, hi, 5), yt: [], yEksen: false, izgara: false, xBicim: mod === 'oran' ? v => f(v, 2) : null});
+    kutu.forEach((c, i) => c && el('rect', {x: x(lo + i * g) + .5, y: y(c / (tah.length * g)), width: x(lo + g) - x(lo) - 1, height: y(0) - y(c / (tah.length * g)), fill: '#0b4a8b', 'fill-opacity': .55}, svg));
+    let d = ''; for (let i = 0; i <= 120; i++) { const v = lo + (hi - lo) * i / 120; d += (i ? ' L' : 'M') + x(v) + ',' + y(I.phi((v - par) / kuramSE) / kuramSE); }
+    el('path', {d, fill: 'none', stroke: '#c8202e', 'stroke-width': 2}, svg);
+    el('line', {x1: x(par), x2: x(par), y1: T, y2: H - B, stroke: '#0b4a8b', 'stroke-dasharray': '4 3'}, svg);
+    $('shAcik').innerHTML = tah.length > 1 ? `Bu n ile ${tah.length} tahmin: ortalama ${f(I.ort(tah), 4)}, gözlenen SH ${f(I.sd(tah), 4)} (kuramsal ${f(kuramSE, 4)}). Kırmızı eğri: kuramsal normal model.` : 'Kırmızı eğri: kuramsal örnekleme dağılımı. Örneklem çektikçe histogram onu izler.';
+  }
+  // ipucu
+  const svg = $('svg'), ip = $('ipucu');
+  svg.addEventListener('mousemove', e => { const g = e.target.closest('g[data-i]'); if (!g) { ip.style.display = 'none'; return; } const a = K[+g.dataset.i];
+    const r = $('tuval').getBoundingClientRect(); ip.style.display = 'block'; ip.style.left = Math.min(e.clientX - r.left + 14, r.width - 230) + 'px'; ip.style.top = (e.clientY - r.top + 12) + 'px';
+    const s = a.mod === 'oran' ? 'p̂' : 'x̄';
+    ip.innerHTML = `<b>Örneklem #${+g.dataset.i + 1}</b> (n = ${a.n})<br>${s} = ${f(a.tah, 4)}${a.s !== undefined ? `<br>s = ${f(a.s, 3)}` : ''}<br>SH = ${f(a.se, 4)}<br>kritik = ${f(a.k, 4)}<br>hata payı = ${f(a.me, 4)}<br>aralık = [${f(a.alt, 3)}; ${f(a.ust, 3)}]<br><b style="color:${a.yakala ? '#6ee7b7' : '#fca5a5'}">${a.yakala ? '✓ parametreyi yakaladı' : '✗ parametreyi kaçırdı'}</b>`; });
+  svg.addEventListener('mouseleave', () => ip.style.display = 'none');
+
+  const sifirla = () => { K = []; guncelle(); };
+  $('b1').addEventListener('click', () => { cek(); guncelle(); });
+  $('b10').addEventListener('click', () => { for (let i = 0; i < 10; i++) cek(); guncelle(); });
+  $('b100').addEventListener('click', async () => { $('b100').disabled = true; for (let i = 0; i < 100; i++) { cek(); if (i % 5 === 4) { guncelle(); await I.bekle(25); } } guncelle(); $('b100').disabled = false; });
+  $('bSifir').addEventListener('click', sifirla);
+  ['p', 'mu', 'sig', 'n'].forEach(id => $(id).addEventListener('input', sifirla));
+  document.querySelectorAll('#cSec .btn').forEach(b => b.addEventListener('click', () => { C = +b.dataset.c; document.querySelectorAll('#cSec .btn').forEach(x => x.classList.toggle('aktif', x === b)); sifirla(); }));
+  document.querySelectorAll('[data-kural]').forEach(b => b.addEventListener('click', () => { kural = b.dataset.kural; document.querySelectorAll('[data-kural]').forEach(x => x.classList.toggle('aktif', x === b)); sifirla(); }));
+  window.addEventListener('sekme', e => { mod = e.detail; $('oranAyar').classList.toggle('gizli', mod !== 'oran'); $('ortAyar').classList.toggle('gizli', mod !== 'ort'); sifirla(); });
+  guncelle();
+})();
+</script>
+</body>
+</html>

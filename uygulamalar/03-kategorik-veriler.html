@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kategorik Verileri Keşfet · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .kat-liste{max-height:300px;overflow:auto;border:1px solid var(--kenar);border-radius:10px}
+  .kat-oge{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid #f1f1f1;font-size:12.5px;font-weight:600}
+  .kat-oge:last-child{border-bottom:0}
+  .kat-oge span{flex:1;text-transform:uppercase;letter-spacing:.02em}
+  .kat-oge button{border:1px solid var(--kenar);background:#fff;border-radius:5px;width:24px;height:22px;cursor:pointer;padding:0;font-size:11px}
+  .kat-oge.kapali span{color:#bbb;text-decoration:line-through}
+  .stil-izgara{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .anahtar{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;cursor:pointer}
+  .anahtar input{display:none}
+  .anahtar .ray{width:38px;height:22px;border-radius:11px;background:#d1d5db;position:relative;transition:.2s}
+  .anahtar .ray::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .anahtar input:checked + .ray{background:var(--mavi)}
+  .anahtar input:checked + .ray::after{left:18px}
+  .vaka{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--mavi-acik);border:1px solid #c9d8ee;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--mavi)}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Kategorik Verileri Keşfet</h1></a>
+  <div class="sag-ust"><a class="geri" href="../index.html">← Tüm Uygulamalar</a></div>
+</header>
+
+<main class="icerik">
+  <div class="izgara">
+    <aside class="kart">
+      <div class="blok">
+        <p class="kb">1. Veri Kaynağı</p>
+        <label class="acik" style="display:block;margin-top:0">Hazır vaka çalışması</label>
+        <select id="vakaSec">
+          <option value="bolum">Öğrencilerin Bölümleri</option>
+          <option value="yemek">Kampüs Yemek Tercihleri</option>
+          <option value="ulasim">Kampüse Ulaşım</option>
+        </select>
+        <div class="birak" id="birak" style="margin-top:10px"><b>Kendi verinizi sürükleyip bırakın</b><br>veya <u>dosya seçin</u> (CSV, XLSX)</div>
+        <input type="file" id="dosya" accept=".csv,.txt,.xlsx,.xls" hidden>
+        <div class="vaka gizli" id="dosyaBilgi" style="margin-top:8px"><span id="dosyaAd"></span><button class="btn" id="dosyaKaldir" style="padding:2px 8px">✕</button></div>
+      </div>
+      <div class="blok">
+        <p class="kb">2. Değişken</p>
+        <select id="kolonSec"></select>
+      </div>
+      <div class="blok">
+        <p class="kb">3. Grafik Türü</p>
+        <div class="stil-izgara" id="stilSec">
+          <button class="btn aktif" data-s="cubuk">▮ Çubuk Grafik</button>
+          <button class="btn" data-s="pasta">◔ Pasta Grafik</button>
+          <button class="btn" data-s="pareto">📈 Pareto</button>
+          <button class="btn" data-s="tablo">▦ Frekans Tablosu</button>
+        </div>
+      </div>
+      <div class="blok">
+        <p class="kb">4. Seçenekler</p>
+        <label class="anahtar"><input type="checkbox" id="goreli"><span class="ray"></span>Göreli frekans (%)</label>
+        <p class="acik" style="margin-bottom:6px">Sıralama</p>
+        <div class="btn-grup" id="siraSec">
+          <button class="btn aktif" data-o="frekans">Frekans</button>
+          <button class="btn" data-o="alfabe">A–Z</button>
+          <button class="btn" data-o="elle">Elle / Sıralı</button>
+        </div>
+      </div>
+      <div class="blok">
+        <p class="kb">5. Kategori Filtresi</p>
+        <p class="acik">Kutucukla gizleyin/gösterin; oklarla sıralı (ordinal) kategorileri elle düzenleyin.</p>
+        <div class="kat-liste" id="katListe"></div>
+      </div>
+    </aside>
+
+    <div class="yigin">
+      <section class="kart">
+        <div class="grafik-ust">
+          <div>
+            <div style="font-size:14px"><b>Değişken:</b> <span id="dEt" style="color:var(--mavi);font-weight:800;text-decoration:underline"></span> &nbsp;|&nbsp; <b id="nEt"></b></div>
+            <div class="acik" id="vakaAcik" style="font-style:italic"></div>
+            <div class="ipucu-k"><b style="color:var(--mavi)">TANIMLI DEĞİŞKENLER:</b> <span id="degTanim"></span></div>
+          </div>
+          <div class="btn-grup" style="flex:0 0 auto">
+            <button class="btn" id="pngBtn">⤓ PNG</button>
+            <button class="btn" id="tamBtn">⤢ Tam Ekran</button>
+          </div>
+        </div>
+        <div class="tuval" id="tuval"><svg id="svg" viewBox="0 0 860 470"></svg><div id="tabloAlan" class="gizli" style="padding:10px"></div></div>
+      </section>
+      <div class="izgara-4">
+        <div class="gosterge"><div class="e">Mod (en sık kategori)</div><div class="d" id="mod" style="font-size:15px;font-family:inherit"></div></div>
+        <div class="gosterge"><div class="e">Tepe oranı</div><div class="d" id="tepe"></div></div>
+        <div class="gosterge"><div class="e">Kategori sayısı</div><div class="d" id="katSay"></div></div>
+        <div class="gosterge"><div class="e">Gözlem sayısı (N)</div><div class="d" id="nSay"></div></div>
+      </div>
+      <div class="icgoru"><span class="et">TASARIM İPUCU</span><div id="ipucu"></div></div>
+    </div>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 03 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  const genis = (sayimlar) => Object.entries(sayimlar).flatMap(([k, n]) => Array(n).fill(k));
+  function vakaUret() {
+    // 1) Bölümler (33 öğrenci)
+    const bolum = genis({'Bilgisayar Mühendisliği': 7, 'Makine Mühendisliği': 6, 'İşletme': 6, 'Psikoloji': 3, 'Biyoloji': 3, 'Hemşirelik': 3, 'İletişim': 2, 'Matematik': 1, 'İnşaat Mühendisliği': 1, 'Felsefe': 1});
+    const sinif = genis({'1. Sınıf': 11, '2. Sınıf': 9, '3. Sınıf': 8, '4. Sınıf': 5});
+    const r1 = I.tohumlu(3), sinifK = I.karistir(sinif, r1);
+    // 2) Yemek (60 öğrenci)
+    const yemek = genis({'Ev yemeği (tabldot)': 17, 'Döner': 13, 'Pizza': 9, 'Hamburger': 8, 'Salata / Vegan': 6, 'Mantı': 4, 'Simit / Poğaça': 3});
+    const fiyat = genis({'Çok ucuz': 6, 'Ucuz': 14, 'Makul': 22, 'Pahalı': 12, 'Çok pahalı': 6});
+    const r2 = I.tohumlu(7), fiyatK = I.karistir(fiyat, r2);
+    // 3) Ulaşım (80 öğrenci)
+    const ulasim = genis({'Belediye otobüsü': 27, 'Servis': 16, 'Yürüyerek': 13, 'Özel araç': 11, 'Minibüs / dolmuş': 8, 'Bisiklet / scooter': 5});
+    const sure = genis({'0–15 dk': 18, '15–30 dk': 31, '30–45 dk': 20, '45 dk üzeri': 11});
+    const r3 = I.tohumlu(11), sureK = I.karistir(sure, r3);
+    return {
+      bolum: {ad: 'Öğrencilerin Bölümleri', acik: 'Bir üniversitede öğrencilerin ana bilim alanlarını ve sınıf düzeylerini izleyen bir anket.', kolonlar: ['Bölüm', 'Sınıf'], tur: {'Bölüm': 'Kategorik (nominal)', 'Sınıf': 'Sıralı (ordinal)'}, sira: {'Sınıf': ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf']}, veri: bolum.map((b, i) => ({'Bölüm': b, 'Sınıf': sinifK[i]}))},
+      yemek: {ad: 'Kampüs Yemek Tercihleri', acik: 'Öğle arasında kampüste en çok tercih edilen yemek türü ve fiyat algısı (60 öğrenci).', kolonlar: ['Yemek Tercihi', 'Fiyat Algısı'], tur: {'Yemek Tercihi': 'Kategorik (nominal)', 'Fiyat Algısı': 'Sıralı (ordinal)'}, sira: {'Fiyat Algısı': ['Çok ucuz', 'Ucuz', 'Makul', 'Pahalı', 'Çok pahalı']}, veri: yemek.map((b, i) => ({'Yemek Tercihi': b, 'Fiyat Algısı': fiyatK[i]}))},
+      ulasim: {ad: 'Kampüse Ulaşım', acik: 'Öğrencilerin kampüse geliş biçimi ve yolculuk süresi (80 öğrenci).', kolonlar: ['Ulaşım Aracı', 'Yolculuk Süresi'], tur: {'Ulaşım Aracı': 'Kategorik (nominal)', 'Yolculuk Süresi': 'Sıralı (ordinal)'}, sira: {'Yolculuk Süresi': ['0–15 dk', '15–30 dk', '30–45 dk', '45 dk üzeri']}, veri: ulasim.map((b, i) => ({'Ulaşım Aracı': b, 'Yolculuk Süresi': sureK[i]}))}
+    };
+  }
+  const VAKA = vakaUret();
+  const RENK = ['#c8202e', '#0b4a8b', '#14966f', '#d97706', '#6d28d9', '#0891b2', '#db2777', '#65a30d', '#475569', '#ea580c', '#7c3aed', '#0d9488'];
+  let ds = null, kolon = null, stil = 'cubuk', sira = 'frekans', durum = {}; // durum[kolon] = {sira:[...], gorunur:Set}
+
+  function veriYukle(d) {
+    ds = d; durum = {};
+    const sec = $('kolonSec'); sec.innerHTML = '<option value="">Değişken seçin…</option>' + d.kolonlar.map(k => `<option>${k}</option>`).join('');
+    kolon = d.kolonlar[0]; sec.value = kolon;
+    $('vakaAcik').textContent = d.acik;
+    $('degTanim').textContent = d.kolonlar.map(k => `${k} (${d.tur[k] || 'Kategorik'})`).join(', ');
+    kolonHazirla(); ciz();
+  }
+  function sayimlar() { const s = {}; ds.veri.forEach(r => { const v = r[kolon]; if (v === '' || v == null) return; s[v] = (s[v] || 0) + 1; }); return s; }
+  function kolonHazirla() {
+    if (!durum[kolon]) { const s = sayimlar(); const ord = ds.sira && ds.sira[kolon];
+      durum[kolon] = {elle: ord ? ord.filter(k => s[k]).concat(Object.keys(s).filter(k => !ord.includes(k))) : Object.keys(s), gorunur: new Set(Object.keys(s))}; }
+    if (ds.sira && ds.sira[kolon] && sira === 'frekans') { sira = 'elle'; siraIsaretle(); }
+  }
+  function siraliKategoriler() {
+    const s = sayimlar(), d = durum[kolon]; let k = d.elle.slice();
+    if (sira === 'frekans') k.sort((a, b) => s[b] - s[a]);
+    else if (sira === 'alfabe') k.sort((a, b) => a.localeCompare(b, 'tr'));
+    return k;
+  }
+  function listeCiz() {
+    const d = durum[kolon], k = siraliKategoriler();
+    $('katListe').innerHTML = k.map(c => `<div class="kat-oge ${d.gorunur.has(c) ? '' : 'kapali'}"><input type="checkbox" data-c="${c}" ${d.gorunur.has(c) ? 'checked' : ''}><span>${c}</span><button data-yukari="${c}" title="Yukarı">▲</button><button data-asagi="${c}" title="Aşağı">▼</button></div>`).join('');
+  }
+  $('katListe').addEventListener('click', e => {
+    const d = durum[kolon]; const c = e.target.dataset;
+    if (c.c !== undefined && e.target.type === 'checkbox') { e.target.checked ? d.gorunur.add(c.c) : d.gorunur.delete(c.c); ciz(); return; }
+    const kat = c.yukari || c.asagi; if (!kat) return;
+    if (sira !== 'elle') { d.elle = siraliKategoriler(); sira = 'elle'; siraIsaretle(); }
+    const i = d.elle.indexOf(kat), j = c.yukari ? i - 1 : i + 1;
+    if (j < 0 || j >= d.elle.length) return; [d.elle[i], d.elle[j]] = [d.elle[j], d.elle[i]]; ciz();
+  });
+  function siraIsaretle() { document.querySelectorAll('#siraSec .btn').forEach(b => b.classList.toggle('aktif', b.dataset.o === sira)); }
+
+  function ciz() {
+    if (!kolon) return;
+    listeCiz();
+    const s = sayimlar(), d = durum[kolon];
+    const kat = siraliKategoriler().filter(c => d.gorunur.has(c));
+    const N = kat.reduce((t, c) => t + s[c], 0), goreli = $('goreli').checked;
+    const deger = c => goreli ? s[c] / N * 100 : s[c];
+    $('dEt').textContent = kolon; $('nEt').textContent = `N = ${N} gözlem`;
+    const enCok = kat.slice().sort((a, b) => s[b] - s[a])[0];
+    $('mod').textContent = enCok || '—'; $('tepe').textContent = N ? I.yz(s[enCok] / N) : '—';
+    $('katSay').textContent = kat.length; $('nSay').textContent = N;
+    $('ipucu').innerHTML = kat.length > 5 && stil === 'pasta'
+      ? '<b>Dikkat:</b> Pasta grafikler 3–5 kategori için idealdir. Bu kadar çok kategoride, frekansa göre sıralanmış bir <b>çubuk grafik</b> çok daha kolay okunur!'
+      : stil === 'pareto' ? '<b>Pareto grafiği</b>, kategorileri azalan sırada çubuklarla ve birikimli yüzdeyi çizgiyle gösterir. "Sorunların %80\'i nedenlerin %20\'sinden kaynaklanır" ilkesini görmek için kullanılır.'
+      : (ds.sira && ds.sira[kolon]) ? 'Bu değişken <b>sıralı (ordinal)</b>: kategorilerin doğal sırası anlamlıdır. Frekansa göre sıralamak yerine doğal sırayı korumak genellikle daha iyidir.'
+      : 'Pasta grafikler 3–5 kategori için idealdir. Çok kategorili verilerde frekansa göre sıralanmış bir çubuk grafik çok daha kolay okunur!';
+    const svg = $('svg'); svg.innerHTML = '';
+    $('tabloAlan').classList.toggle('gizli', stil !== 'tablo'); svg.classList.toggle('gizli', stil === 'tablo');
+    if (!kat.length) { el('text', {x: 430, y: 235, 'text-anchor': 'middle', fill: '#999'}, svg, 'Gösterilecek kategori yok'); return; }
+    const W = 860, H = 470;
+    if (stil === 'cubuk' || stil === 'pareto') {
+      const pareto = stil === 'pareto';
+      const ks = pareto ? kat.slice().sort((a, b) => s[b] - s[a]) : kat;
+      const maks = Math.max(...ks.map(deger)); const L = 66, R = pareto ? 66 : 20, T = 24, B = 120;
+      const yt = I.tiklerKapsa(0, maks * 1.08, 5); const y = I.olcek(0, yt[yt.length - 1], H - B, T);
+      const bw = (W - L - R) / ks.length;
+      I.eksenler(svg, {W, H, L, R, T, B, x: v => v, y, xt: [], yt, yEt: goreli ? 'Göreli frekans (%)' : 'Frekans', yBicim: v => goreli ? '%' + f(v, 0) : f(v, 0)});
+      ks.forEach((c, i) => {
+        const x = L + i * bw, h = y(0) - y(deger(c));
+        const r = el('rect', {x: x + bw * .14, y: y(deger(c)), width: bw * .72, height: h, fill: pareto ? '#0b4a8b' : '#c8202e', rx: 2}, svg);
+        el('title', {}, r, `${c}: ${s[c]} (${I.yz(s[c] / N)})`);
+        el('text', {x: x + bw / 2, y: y(deger(c)) - 6, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 700, fill: '#333'}, svg, goreli ? f(deger(c), 1) : s[c]);
+        el('text', {x: x + bw / 2, y: H - B + 14, 'text-anchor': 'end', 'font-size': 11.5, fill: '#333', transform: `rotate(-40 ${x + bw / 2} ${H - B + 14})`}, svg, c);
+      });
+      if (pareto) {
+        const y2 = I.olcek(0, 100, H - B, T); let bir = 0; let d = '';
+        [0, 25, 50, 75, 100].forEach(v => el('text', {x: W - R + 8, y: y2(v) + 4, 'font-size': 11, fill: '#c8202e', class: 'svg-yazi'}, svg, '%' + v));
+        el('text', {x: W - 14, y: (T + H - B) / 2, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#c8202e', transform: `rotate(90 ${W - 14} ${(T + H - B) / 2})`}, svg, 'Birikimli %');
+        el('line', {x1: W - R, x2: W - R, y1: T, y2: H - B, stroke: '#c8202e'}, svg);
+        el('line', {x1: L, x2: W - R, y1: y2(80), y2: y2(80), stroke: '#c8202e', 'stroke-dasharray': '3 4', opacity: .5}, svg);
+        ks.forEach((c, i) => { bir += s[c] / N * 100; const px = L + i * bw + bw / 2; d += (i ? ' L' : 'M') + px + ',' + y2(bir);
+          el('circle', {cx: px, cy: y2(bir), r: 4, fill: '#c8202e'}, svg); });
+        el('path', {d, fill: 'none', stroke: '#c8202e', 'stroke-width': 2.2}, svg);
+        svg.appendChild(svg.lastChild);
+      }
+    } else if (stil === 'pasta') {
+      const cx = 300, cy = 235, r = 190; let a0 = -Math.PI / 2;
+      kat.forEach((c, i) => {
+        const pay = s[c] / N, a1 = a0 + pay * 2 * Math.PI, buyuk = pay > .5 ? 1 : 0;
+        const p = kat.length === 1 ? el('circle', {cx, cy, r, fill: RENK[0]}, svg)
+          : el('path', {d: `M${cx},${cy} L${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} A${r},${r} 0 ${buyuk} 1 ${cx + r * Math.cos(a1)},${cy + r * Math.sin(a1)} Z`, fill: RENK[i % RENK.length], stroke: '#fff', 'stroke-width': 2}, svg);
+        el('title', {}, p, `${c}: ${s[c]} (${I.yz(pay)})`);
+        if (pay > .045) { const am = (a0 + a1) / 2; el('text', {x: cx + r * .66 * Math.cos(am), y: cy + r * .66 * Math.sin(am) + 4, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#fff'}, svg, I.yz(pay, 0)); }
+        a0 = a1;
+      });
+      kat.forEach((c, i) => { const yy = 40 + i * 26;
+        el('rect', {x: 540, y: yy - 11, width: 14, height: 14, rx: 3, fill: RENK[i % RENK.length]}, svg);
+        el('text', {x: 562, y: yy, 'font-size': 12.5, fill: '#333'}, svg, `${c}: ${s[c]} (${I.yz(s[c] / N)})`); });
+    } else {
+      let bir = 0;
+      $('tabloAlan').innerHTML = `<table class="veri"><thead><tr><th>${kolon}</th><th>Frekans</th><th>Göreli frekans</th><th>Birikimli frekans</th><th>Birikimli %</th></tr></thead><tbody>` +
+        kat.map(c => { bir += s[c]; return `<tr><td>${c}</td><td>${s[c]}</td><td>${I.yz(s[c] / N)}</td><td>${bir}</td><td>${I.yz(bir / N)}</td></tr>`; }).join('') +
+        `<tr class="toplam"><td>Toplam</td><td>${N}</td><td>%100,0</td><td></td><td></td></tr></tbody></table>`;
+    }
+  }
+
+  $('vakaSec').addEventListener('change', e => { $('dosyaBilgi').classList.add('gizli'); veriYukle(VAKA[e.target.value]); });
+  $('kolonSec').addEventListener('change', e => { if (!e.target.value) return; kolon = e.target.value; sira = 'frekans'; siraIsaretle(); kolonHazirla(); ciz(); });
+  document.querySelectorAll('#stilSec .btn').forEach(b => b.addEventListener('click', () => { stil = b.dataset.s; document.querySelectorAll('#stilSec .btn').forEach(x => x.classList.toggle('aktif', x === b)); ciz(); }));
+  document.querySelectorAll('#siraSec .btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.o === 'elle' && sira !== 'elle') durum[kolon].elle = siraliKategoriler(); sira = b.dataset.o; siraIsaretle(); ciz(); }));
+  $('goreli').addEventListener('change', ciz);
+  $('pngBtn').addEventListener('click', () => I.svgIndir($('svg'), 'kategorik-' + kolon, 'png'));
+  $('tamBtn').addEventListener('click', () => { const t = $('tuval'); document.fullscreenElement ? document.exitFullscreen() : t.requestFullscreen && t.requestFullscreen(); });
+  I.birakmaAlani($('birak'), $('dosya'), async dosya => {
+    try { const d = await I.dosyaOku(dosya);
+      const kat = d.kolonlar.filter(k => { const u = new Set(d.veri.map(r => r[k])); return u.size >= 1 && u.size <= 40; });
+      if (!kat.length) throw new Error('Kategorik (en fazla 40 farklı değer içeren) sütun bulunamadı.');
+      d.kolonlar = kat; d.tur = {}; kat.forEach(k => d.tur[k] = d.sayisal.includes(k) ? 'Sayısal kodlu' : 'Kategorik');
+      d.veri.forEach(r => kat.forEach(k => r[k] = r[k] == null ? '' : String(r[k])));
+      d.acik = `Yüklenen dosya: ${dosya.name} (${d.veri.length} satır).`; d.sira = {};
+      $('dosyaAd').textContent = '📄 ' + dosya.name; $('dosyaBilgi').classList.remove('gizli'); veriYukle(d);
+    } catch (e) { alert('Dosya okunamadı: ' + e.message); }
+  });
+  $('dosyaKaldir').addEventListener('click', () => { $('dosyaBilgi').classList.add('gizli'); veriYukle(VAKA[$('vakaSec').value]); });
+  veriYukle(VAKA.bolum);
+})();
+</script>
+</body>
+</html>

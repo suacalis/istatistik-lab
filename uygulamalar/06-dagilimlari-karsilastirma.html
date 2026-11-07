@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dağılımları Karşılaştırma · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .kat-liste{max-height:220px;overflow:auto;border:1px solid var(--kenar);border-radius:10px}
+  .kat-oge{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid #f1f1f1;font-size:12.5px;font-weight:600}
+  .kat-oge:last-child{border-bottom:0}
+  .kat-oge span{flex:1;text-transform:uppercase}
+  .kat-oge button{border:1px solid var(--kenar);background:#fff;border-radius:5px;width:24px;height:22px;cursor:pointer;padding:0;font-size:11px}
+  .kat-oge.kapali span{color:#bbb;text-decoration:line-through}
+  .renkler{display:flex;gap:8px;flex-wrap:wrap}
+  .renkler button{width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #ccc;cursor:pointer}
+  .renkler button.aktif{box-shadow:0 0 0 2px #111}
+  .disa{display:flex;align-items:center;gap:6px;padding:0 16px;border-left:1px solid var(--kenar);font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--soluk)}
+  .disa .btn{padding:5px 10px;font-size:12px}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Dağılımları Karşılaştırma</h1></a>
+  <div class="sag-ust">
+    <div class="disa">DIŞA AKTAR <button class="btn" data-dis="png">PNG</button><button class="btn" data-dis="jpg">JPG</button><button class="btn kirmizi" data-dis="svg">SVG</button></div>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+
+<main class="icerik">
+  <div class="izgara">
+    <aside class="kart">
+      <div class="blok">
+        <p class="kb">1. Veri Kaynağı</p>
+        <div class="birak" id="birak"><div style="font-size:22px">⤒</div><b>VERİ DOSYASINI SÜRÜKLEYİN</b><br>veya <u>dosya seçin</u><br><span class="ipucu-k">CSV, XLSX, XLS</span></div>
+        <input type="file" id="dosya" accept=".csv,.txt,.xlsx,.xls" hidden>
+        <div class="btn-grup" style="margin-top:8px"><button class="btn" id="irisBtn">Iris verisi</button><button class="btn" id="co2Btn">CO2 verisi</button></div>
+        <div class="acik" id="veriAcik"></div>
+        <label class="acik" style="display:block">Hedef ölçüm (sayısal)</label><select id="hedef"></select>
+        <label class="acik" style="display:block">Gruplama değişkeni (kategorik)</label><select id="grup"></select>
+      </div>
+      <div class="blok">
+        <p class="kb">2. Genel Ayarlar</p>
+        <label class="acik" style="display:block;margin-top:0">Sıralama</label>
+        <select id="sira">
+          <option value="az">Gruplar (A → Z)</option><option value="za">Gruplar (Z → A)</option>
+          <option value="medArt">Medyan (düşük → yüksek)</option><option value="medAzl">Medyan (yüksek → düşük)</option><option value="elle">Elle / Özel</option>
+        </select>
+        <div class="bas" style="margin-top:10px"><span style="font-size:13px;font-weight:600">Yönelim</span><div class="btn-grup" style="width:150px"><button class="btn aktif" data-yon="dik">Dikey</button><button class="btn" data-yon="yatay">Yatay</button></div></div>
+        <div class="bas" style="margin-top:10px"><span style="font-size:13px;font-weight:600">Grafik</span><div class="btn-grup" style="width:200px"><button class="btn aktif" data-tur="kutu">Kutu</button><button class="btn" data-tur="keman">Keman</button></div></div>
+      </div>
+      <div class="blok">
+        <p class="kb">3. Kategori Denetimi</p>
+        <p class="acik">Kutucukla gizleyin/gösterin; oklarla kategorileri elle sıralayın.</p>
+        <div class="kat-liste" id="katListe"></div>
+      </div>
+      <div class="blok">
+        <p class="kb">4. Görünüm</p>
+        <label class="acik" style="display:block;margin-top:0">Dolgu rengi</label>
+        <div class="renkler" id="renkler"></div>
+        <label class="onay"><input type="checkbox" id="noktalar">Veri noktalarını göster</label>
+        <label class="onay"><input type="checkbox" id="aykiri" checked>Aykırı değerleri göster</label>
+        <label class="onay"><input type="checkbox" id="ortGoster">Ortalamayı göster (◆)</label>
+        <div class="bas"><span style="font-size:13px;font-weight:600">Yazı boyutu</span><span class="rozet r-gri" id="ybR">15 px</span></div>
+        <input type="range" id="yb" min="10" max="24" step="1" value="15">
+      </div>
+    </aside>
+
+    <div class="yigin">
+      <section class="kart">
+        <div class="grafik-ust"><div><h2 id="baslik"></h2><div class="acik" id="altBaslik"></div></div><button class="btn birincil" data-tuval="tuval" id="tamBtn">⤢ Tam Ekran</button></div>
+        <div class="tuval" id="tuval"><svg id="svg" viewBox="0 0 900 520"></svg></div>
+      </section>
+      <section class="kart">
+        <h3>Gruplara Göre Özet İstatistikler</h3>
+        <div style="overflow:auto"><table class="veri" id="ozet"></table></div>
+        <div class="icgoru" style="margin-top:12px"><span class="et">KARŞILAŞTIR</span><div id="yorum"></div></div>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 06 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+const IRIS = `sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,setosa
+4.9,3.0,1.4,0.2,setosa
+4.7,3.2,1.3,0.2,setosa
+4.6,3.1,1.5,0.2,setosa
+5.0,3.6,1.4,0.2,setosa
+5.4,3.9,1.7,0.4,setosa
+4.6,3.4,1.4,0.3,setosa
+5.0,3.4,1.5,0.2,setosa
+4.4,2.9,1.4,0.2,setosa
+4.9,3.1,1.5,0.1,setosa
+5.4,3.7,1.5,0.2,setosa
+4.8,3.4,1.6,0.2,setosa
+4.8,3.0,1.4,0.1,setosa
+4.3,3.0,1.1,0.1,setosa
+5.8,4.0,1.2,0.2,setosa
+5.7,4.4,1.5,0.4,setosa
+5.4,3.9,1.3,0.4,setosa
+5.1,3.5,1.4,0.3,setosa
+5.7,3.8,1.7,0.3,setosa
+5.1,3.8,1.5,0.3,setosa
+5.4,3.4,1.7,0.2,setosa
+5.1,3.7,1.5,0.4,setosa
+4.6,3.6,1.0,0.2,setosa
+5.1,3.3,1.7,0.5,setosa
+4.8,3.4,1.9,0.2,setosa
+5.0,3.0,1.6,0.2,setosa
+5.0,3.4,1.6,0.4,setosa
+5.2,3.5,1.5,0.2,setosa
+5.2,3.4,1.4,0.2,setosa
+4.7,3.2,1.6,0.2,setosa
+4.8,3.1,1.6,0.2,setosa
+5.4,3.4,1.5,0.4,setosa
+5.2,4.1,1.5,0.1,setosa
+5.5,4.2,1.4,0.2,setosa
+4.9,3.1,1.5,0.2,setosa
+5.0,3.2,1.2,0.2,setosa
+5.5,3.5,1.3,0.2,setosa
+4.9,3.6,1.4,0.1,setosa
+4.4,3.0,1.3,0.2,setosa
+5.1,3.4,1.5,0.2,setosa
+5.0,3.5,1.3,0.3,setosa
+4.5,2.3,1.3,0.3,setosa
+4.4,3.2,1.3,0.2,setosa
+5.0,3.5,1.6,0.6,setosa
+5.1,3.8,1.9,0.4,setosa
+4.8,3.0,1.4,0.3,setosa
+5.1,3.8,1.6,0.2,setosa
+4.6,3.2,1.4,0.2,setosa
+5.3,3.7,1.5,0.2,setosa
+5.0,3.3,1.4,0.2,setosa
+7.0,3.2,4.7,1.4,versicolor
+6.4,3.2,4.5,1.5,versicolor
+6.9,3.1,4.9,1.5,versicolor
+5.5,2.3,4.0,1.3,versicolor
+6.5,2.8,4.6,1.5,versicolor
+5.7,2.8,4.5,1.3,versicolor
+6.3,3.3,4.7,1.6,versicolor
+4.9,2.4,3.3,1.0,versicolor
+6.6,2.9,4.6,1.3,versicolor
+5.2,2.7,3.9,1.4,versicolor
+5.0,2.0,3.5,1.0,versicolor
+5.9,3.0,4.2,1.5,versicolor
+6.0,2.2,4.0,1.0,versicolor
+6.1,2.9,4.7,1.4,versicolor
+5.6,2.9,3.6,1.3,versicolor
+6.7,3.1,4.4,1.4,versicolor
+5.6,3.0,4.5,1.5,versicolor
+5.8,2.7,4.1,1.0,versicolor
+6.2,2.2,4.5,1.5,versicolor
+5.6,2.5,3.9,1.1,versicolor
+5.9,3.2,4.8,1.8,versicolor
+6.1,2.8,4.0,1.3,versicolor
+6.3,2.5,4.9,1.5,versicolor
+6.1,2.8,4.7,1.2,versicolor
+6.4,2.9,4.3,1.3,versicolor
+6.6,3.0,4.4,1.4,versicolor
+6.8,2.8,4.8,1.4,versicolor
+6.7,3.0,5.0,1.7,versicolor
+6.0,2.9,4.5,1.5,versicolor
+5.7,2.6,3.5,1.0,versicolor
+5.5,2.4,3.8,1.1,versicolor
+5.5,2.4,3.7,1.0,versicolor
+5.8,2.7,3.9,1.2,versicolor
+6.0,2.7,5.1,1.6,versicolor
+5.4,3.0,4.5,1.5,versicolor
+6.0,3.4,4.5,1.6,versicolor
+6.7,3.1,4.7,1.5,versicolor
+6.3,2.3,4.4,1.3,versicolor
+5.6,3.0,4.1,1.3,versicolor
+5.5,2.5,4.0,1.3,versicolor
+5.5,2.6,4.4,1.2,versicolor
+6.1,3.0,4.6,1.4,versicolor
+5.8,2.6,4.0,1.2,versicolor
+5.0,2.3,3.3,1.0,versicolor
+5.6,2.7,4.2,1.3,versicolor
+5.7,3.0,4.2,1.2,versicolor
+5.7,2.9,4.2,1.3,versicolor
+6.2,2.9,4.3,1.3,versicolor
+5.1,2.5,3.0,1.1,versicolor
+5.7,2.8,4.1,1.3,versicolor
+6.3,3.3,6.0,2.5,virginica
+5.8,2.7,5.1,1.9,virginica
+7.1,3.0,5.9,2.1,virginica
+6.3,2.9,5.6,1.8,virginica
+6.5,3.0,5.8,2.2,virginica
+7.6,3.0,6.6,2.1,virginica
+4.9,2.5,4.5,1.7,virginica
+7.3,2.9,6.3,1.8,virginica
+6.7,2.5,5.8,1.8,virginica
+7.2,3.6,6.1,2.5,virginica
+6.5,3.2,5.1,2.0,virginica
+6.4,2.7,5.3,1.9,virginica
+6.8,3.0,5.5,2.1,virginica
+5.7,2.5,5.0,2.0,virginica
+5.8,2.8,5.1,2.4,virginica
+6.4,3.2,5.3,2.3,virginica
+6.5,3.0,5.5,1.8,virginica
+7.7,3.8,6.7,2.2,virginica
+7.7,2.6,6.9,2.3,virginica
+6.0,2.2,5.0,1.5,virginica
+6.9,3.2,5.7,2.3,virginica
+5.6,2.8,4.9,2.0,virginica
+7.7,2.8,6.7,2.0,virginica
+6.3,2.7,4.9,1.8,virginica
+6.7,3.3,5.7,2.1,virginica
+7.2,3.2,6.0,1.8,virginica
+6.2,2.8,4.8,1.8,virginica
+6.1,3.0,4.9,1.8,virginica
+6.4,2.8,5.6,2.1,virginica
+7.2,3.0,5.8,1.6,virginica
+7.4,2.8,6.1,1.9,virginica
+7.9,3.8,6.4,2.0,virginica
+6.4,2.8,5.6,2.2,virginica
+6.3,2.8,5.1,1.5,virginica
+6.1,2.6,5.6,1.4,virginica
+7.7,3.0,6.1,2.3,virginica
+6.3,3.4,5.6,2.4,virginica
+6.4,3.1,5.5,1.8,virginica
+6.0,3.0,4.8,1.8,virginica
+6.9,3.1,5.4,2.1,virginica
+6.7,3.1,5.6,2.4,virginica
+6.9,3.1,5.1,2.3,virginica
+5.8,2.7,5.1,1.9,virginica
+6.8,3.2,5.9,2.3,virginica
+6.7,3.3,5.7,2.5,virginica
+6.7,3.0,5.2,2.3,virginica
+6.3,2.5,5.0,1.9,virginica
+6.5,3.0,5.2,2.0,virginica
+6.2,3.4,5.4,2.3,virginica
+5.9,3.0,5.1,1.8,virginica`;
+const CO2 = `Plant,Type,Treatment,conc,uptake
+Qn1,Quebec,nonchilled,95,16.0
+Qn1,Quebec,nonchilled,175,30.4
+Qn1,Quebec,nonchilled,250,34.8
+Qn1,Quebec,nonchilled,350,37.2
+Qn1,Quebec,nonchilled,500,35.3
+Qn1,Quebec,nonchilled,675,39.2
+Qn2,Quebec,nonchilled,95,15.2
+Qn2,Quebec,nonchilled,175,30.0
+Qn2,Quebec,nonchilled,250,37.4
+Qn2,Quebec,nonchilled,350,37.1
+Qn2,Quebec,nonchilled,500,40.3
+Qn2,Quebec,nonchilled,675,42.1
+Qc1,Quebec,chilled,95,14.2
+Qc1,Quebec,chilled,175,24.1
+Qc1,Quebec,chilled,250,30.3
+Qc1,Quebec,chilled,350,34.6
+Qc1,Quebec,chilled,500,32.5
+Qc1,Quebec,chilled,675,35.4
+Mn1,Mississippi,nonchilled,95,10.6
+Mn1,Mississippi,nonchilled,175,19.2
+Mn1,Mississippi,nonchilled,250,26.2
+Mn1,Mississippi,nonchilled,350,30.0
+Mn1,Mississippi,nonchilled,500,30.9
+Mn1,Mississippi,nonchilled,675,32.4
+Mn2,Mississippi,nonchilled,95,12.0
+Mn2,Mississippi,nonchilled,175,22.0
+Mn2,Mississippi,nonchilled,250,30.6
+Mn2,Mississippi,nonchilled,350,31.8
+Mn2,Mississippi,nonchilled,500,32.4
+Mn2,Mississippi,nonchilled,675,31.1
+Mc1,Mississippi,chilled,95,10.5
+Mc1,Mississippi,chilled,175,14.9
+Mc1,Mississippi,chilled,250,18.1
+Mc1,Mississippi,chilled,350,18.9
+Mc1,Mississippi,chilled,500,19.5
+Mc1,Mississippi,chilled,675,22.2`;
+
+(() => {
+  const {$, el, f} = I;
+  const RENKLER = ['#5b5bd6', '#0b4a8b', '#c8202e', '#14966f', '#d97706', '#0891b2', '#9ca3af'];
+  let ds = null, hedef = null, grup = null, yon = 'dik', tur = 'kutu', renk = RENKLER[0], elle = [], gorunur = new Set();
+  $('renkler').innerHTML = RENKLER.map((r, i) => `<button style="background:${r}" data-r="${r}" class="${i ? '' : 'aktif'}"></button>`).join('');
+  $('renkler').addEventListener('click', e => { if (!e.target.dataset.r) return; renk = e.target.dataset.r; $('renkler').querySelectorAll('button').forEach(b => b.classList.toggle('aktif', b === e.target)); ciz(); });
+
+  function yukle(d, acik) {
+    ds = d; if (!d.sayisal.length || !d.kategorik.length) { alert('Veride en az bir sayısal ve bir kategorik sütun olmalı.'); return; }
+    $('hedef').innerHTML = d.sayisal.map(k => `<option>${k}</option>`).join('');
+    $('grup').innerHTML = d.kategorik.map(k => `<option>${k}</option>`).join('');
+    hedef = d.sayisal[d.sayisal.includes('uptake') ? d.sayisal.indexOf('uptake') : 0]; grup = d.kategorik[d.kategorik.includes('Treatment') ? d.kategorik.indexOf('Treatment') : 0];
+    $('hedef').value = hedef; $('grup').value = grup; $('veriAcik').innerHTML = acik; grupHazirla(); ciz();
+  }
+  function grupHazirla() { const g = [...new Set(ds.veri.map(r => r[grup]).filter(v => v !== '' && v != null))].map(String); elle = g.slice(); gorunur = new Set(g); }
+  function gruplar() {
+    const v = {}; ds.veri.forEach(r => { const k = String(r[grup]), x = r[hedef]; if (r[grup] === '' || r[grup] == null || x == null || !isFinite(x)) return; (v[k] = v[k] || []).push(x); });
+    let k = elle.filter(g => gorunur.has(g) && v[g]); const s = $('sira').value;
+    if (s === 'az') k.sort((a, b) => a.localeCompare(b, 'tr')); else if (s === 'za') k.sort((a, b) => b.localeCompare(a, 'tr'));
+    else if (s === 'medArt') k.sort((a, b) => I.kantil(v[a], .5) - I.kantil(v[b], .5)); else if (s === 'medAzl') k.sort((a, b) => I.kantil(v[b], .5) - I.kantil(v[a], .5));
+    return {k, v};
+  }
+  function liste() {
+    const {k} = gruplar(); const sirali = $('sira').value === 'elle' ? elle : k.concat(elle.filter(g => !k.includes(g)));
+    $('katListe').innerHTML = sirali.map(c => `<div class="kat-oge ${gorunur.has(c) ? '' : 'kapali'}"><input type="checkbox" data-c="${c}" ${gorunur.has(c) ? 'checked' : ''}><span>${c}</span><button data-yukari="${c}">▲</button><button data-asagi="${c}">▼</button></div>`).join('');
+  }
+  $('katListe').addEventListener('click', e => {
+    const d = e.target.dataset;
+    if (e.target.type === 'checkbox') { e.target.checked ? gorunur.add(d.c) : gorunur.delete(d.c); ciz(); return; }
+    const kat = d.yukari || d.asagi; if (!kat) return;
+    if ($('sira').value !== 'elle') { const {k} = gruplar(); elle = k.concat(elle.filter(g => !k.includes(g))); $('sira').value = 'elle'; }
+    const i = elle.indexOf(kat), j = d.yukari ? i - 1 : i + 1; if (j < 0 || j >= elle.length) return; [elle[i], elle[j]] = [elle[j], elle[i]]; ciz();
+  });
+
+  function kde(v, xs, h) { return xs.map(x => v.reduce((t, a) => t + I.phi((x - a) / h), 0) / (v.length * h)); }
+
+  function ciz() {
+    liste(); const {k, v} = gruplar(); const svg = $('svg'); svg.innerHTML = ''; const fs = +$('yb').value;
+    $('baslik').textContent = `${hedef} — ${grup} gruplarına göre`; $('altBaslik').textContent = `${k.length} grup · ${k.reduce((t, g) => t + v[g].length, 0)} gözlem`;
+    if (!k.length) return;
+    const W = 900, H = 520, dik = yon === 'dik';
+    const L = dik ? 80 : 150, R = 24, T = 24, B = dik ? 80 : 70;
+    const tum = k.flatMap(g => v[g]); const vt = I.tiklerKapsa(Math.min(...tum), Math.max(...tum), 8);
+    const deg = dik ? I.olcek(vt[0], vt[vt.length - 1], H - B, T) : I.olcek(vt[0], vt[vt.length - 1], L, W - R);
+    const bant = (dik ? (W - L - R) : (H - T - B)) / k.length, merkez = i => (dik ? L : T) + bant * (i + .5), gen = Math.min(120, bant * .5);
+    // eksen
+    const g0 = el('g', {}, svg);
+    vt.forEach(t => { const p = deg(t);
+      if (dik) { el('line', {x1: L, x2: W - R, y1: p, y2: p, stroke: '#ececec'}, g0); el('text', {x: L - 8, y: p + fs / 3, 'text-anchor': 'end', 'font-size': fs * .8, fill: '#555'}, g0, f(t, I.ondalik(vt))); }
+      else { el('line', {y1: T, y2: H - B, x1: p, x2: p, stroke: '#ececec'}, g0); el('text', {x: p, y: H - B + fs + 4, 'text-anchor': 'middle', 'font-size': fs * .8, fill: '#555'}, g0, f(t, I.ondalik(vt))); } });
+    el('line', dik ? {x1: L, x2: L, y1: T, y2: H - B, stroke: '#888'} : {x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: '#888'}, g0);
+    el('line', dik ? {x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: '#888'} : {x1: L, x2: L, y1: T, y2: H - B, stroke: '#888'}, g0);
+    const etH = dik ? {x: 18, y: (T + H - B) / 2, transform: `rotate(-90 18 ${(T + H - B) / 2})`} : {x: (L + W - R) / 2, y: H - 12};
+    el('text', {...etH, 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#222'}, g0, hedef);
+    const etG = dik ? {x: (L + W - R) / 2, y: H - 14} : {x: 16, y: (T + H - B) / 2, transform: `rotate(-90 16 ${(T + H - B) / 2})`};
+    el('text', {...etG, 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#222'}, g0, grup);
+    const P = (c, d) => dik ? {x: c, y: d} : {x: d, y: c}; // c: grup ekseni, d: değer ekseni
+    k.forEach((g, i) => {
+      const o = I.ozet5(v[g]), c = merkez(i);
+      const ad = P(c, 0); el('text', dik ? {x: c, y: H - B + fs + 6, 'text-anchor': 'middle', 'font-size': fs * .9, fill: '#222'} : {x: L - 8, y: c + fs / 3, 'text-anchor': 'end', 'font-size': fs * .9, fill: '#222'}, svg, g);
+      if (tur === 'keman') {
+        const xs = []; const lo = Math.max(vt[0], o.min - (o.max - o.min) * .1), hi = Math.min(vt[vt.length - 1], o.max + (o.max - o.min) * .1); for (let j = 0; j <= 60; j++) xs.push(lo + (hi - lo) * j / 60);
+        const h = 1.06 * (o.sd || 1) * Math.pow(o.n, -.2) || 1; const ds2 = kde(v[g], xs, h); const mx = Math.max(...ds2);
+        let d = ''; xs.forEach((x, j) => { const p = P(c + ds2[j] / mx * gen * .9, deg(x)); d += (j ? 'L' : 'M') + p.x + ',' + p.y; });
+        for (let j = xs.length - 1; j >= 0; j--) { const p = P(c - ds2[j] / mx * gen * .9, deg(xs[j])); d += 'L' + p.x + ',' + p.y; }
+        el('path', {d: d + 'Z', fill: renk, 'fill-opacity': .35, stroke: renk, 'stroke-width': 1.5}, svg);
+        const a = P(c - 8, deg(o.q1)), b = P(c + 8, deg(o.q3));
+        el('rect', {x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y), fill: '#1d2433'}, svg);
+        const m = P(c, deg(o.med)); el('circle', {cx: m.x, cy: m.y, r: 4, fill: '#fff'}, svg);
+      } else {
+        const w1 = P(c, deg(o.bigMin)), w2 = P(c, deg(o.q1)), w3 = P(c, deg(o.q3)), w4 = P(c, deg(o.bigMax));
+        el('line', {x1: w1.x, y1: w1.y, x2: w2.x, y2: w2.y, stroke: '#333', 'stroke-width': 1.5}, svg);
+        el('line', {x1: w3.x, y1: w3.y, x2: w4.x, y2: w4.y, stroke: '#333', 'stroke-width': 1.5}, svg);
+        [o.bigMin, o.bigMax].forEach(val => { const a = P(c - gen / 4, deg(val)), b = P(c + gen / 4, deg(val)); el('line', {x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: '#333', 'stroke-width': 1.5}, svg); });
+        const a = P(c - gen / 2, deg(o.q1)), b = P(c + gen / 2, deg(o.q3));
+        const r = el('rect', {x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y), fill: renk, 'fill-opacity': .85, stroke: '#1d2433', 'stroke-width': 1.2}, svg);
+        el('title', {}, r, `${g}\nn=${o.n}\nMin=${f(o.min, 2)} Q1=${f(o.q1, 2)} Medyan=${f(o.med, 2)} Q3=${f(o.q3, 2)} Maks=${f(o.max, 2)}`);
+        const m1 = P(c - gen / 2, deg(o.med)), m2 = P(c + gen / 2, deg(o.med)); el('line', {x1: m1.x, y1: m1.y, x2: m2.x, y2: m2.y, stroke: '#111', 'stroke-width': 2.5}, svg);
+        if ($('aykiri').checked) o.aykiri.forEach(val => { const p = P(c, deg(val)); el('circle', {cx: p.x, cy: p.y, r: 4.5, fill: '#c8202e'}, svg); });
+      }
+      if ($('noktalar').checked) v[g].forEach(val => { const p = P(c + (Math.random() - .5) * gen * .7, deg(val)); el('circle', {cx: p.x, cy: p.y, r: 2.6, fill: '#111', 'fill-opacity': .45}, svg); });
+      if ($('ortGoster').checked) { const p = P(c, deg(o.ort)); el('path', {d: `M${p.x},${p.y - 7} l7,7 l-7,7 l-7,-7z`, fill: '#f59e0b', stroke: '#fff'}, svg); }
+    });
+    // özet tablo
+    const oz = k.map(g => [g, I.ozet5(v[g])]);
+    $('ozet').innerHTML = `<thead><tr><th>${grup}</th><th>n</th><th>Ortalama</th><th>Std. sapma</th><th>Min</th><th>Q1</th><th>Medyan</th><th>Q3</th><th>Maks</th><th>IQR</th><th>Aykırı</th></tr></thead><tbody>` +
+      oz.map(([g, o]) => `<tr><td><b>${g}</b></td><td>${o.n}</td><td>${f(o.ort, 2)}</td><td>${f(o.sd, 2)}</td><td>${f(o.min, 2)}</td><td>${f(o.q1, 2)}</td><td>${f(o.med, 2)}</td><td>${f(o.q3, 2)}</td><td>${f(o.max, 2)}</td><td>${f(o.iqr, 2)}</td><td>${o.aykiri.length}</td></tr>`).join('') + '</tbody>';
+    if (oz.length > 1) { const s = oz.slice().sort((a, b) => b[1].med - a[1].med), y = oz.slice().sort((a, b) => b[1].iqr - a[1].iqr);
+      const ortust = oz.some(([, a]) => oz.some(([, b]) => a !== b && a.q1 <= b.q3 && b.q1 <= a.q3));
+      $('yorum').innerHTML = `<b>Merkez:</b> En yüksek medyan <b>${s[0][0]}</b> (${f(s[0][1].med, 2)}), en düşük <b>${s[s.length - 1][0]}</b> (${f(s[s.length - 1][1].med, 2)}). <b>Yayılım:</b> En geniş IQR <b>${y[0][0]}</b> (${f(y[0][1].iqr, 2)}). ` +
+        (ortust ? 'Bazı grupların kutuları (orta %50) <b>örtüşüyor</b>; bu gruplar arasındaki fark o kadar belirgin olmayabilir.' : 'Kutular <b>örtüşmüyor</b>: gruplar arasında belirgin bir konum farkı var.') +
+        ' Karşılaştırmada her zaman <b>şekil, merkez, yayılım ve aykırı değerleri</b> birlikte yorumlayın.';
+    } else $('yorum').textContent = 'Karşılaştırma için en az iki grup gösterin.';
+  }
+  $('hedef').addEventListener('change', e => { hedef = e.target.value; ciz(); });
+  $('grup').addEventListener('change', e => { grup = e.target.value; grupHazirla(); ciz(); });
+  $('sira').addEventListener('change', ciz);
+  document.querySelectorAll('[data-yon]').forEach(b => b.addEventListener('click', () => { yon = b.dataset.yon; document.querySelectorAll('[data-yon]').forEach(x => x.classList.toggle('aktif', x === b)); ciz(); }));
+  document.querySelectorAll('[data-tur]').forEach(b => b.addEventListener('click', () => { tur = b.dataset.tur; document.querySelectorAll('[data-tur]').forEach(x => x.classList.toggle('aktif', x === b)); ciz(); }));
+  ['noktalar', 'aykiri', 'ortGoster'].forEach(id => $(id).addEventListener('change', ciz));
+  $('yb').addEventListener('input', () => { $('ybR').textContent = $('yb').value + ' px'; ciz(); });
+  document.querySelectorAll('[data-dis]').forEach(b => b.addEventListener('click', () => I.svgIndir($('svg'), `${hedef}-${grup}`, b.dataset.dis)));
+  $('tamBtn').addEventListener('click', () => { const t = $('tuval'); document.fullscreenElement ? document.exitFullscreen() : t.requestFullscreen && t.requestFullscreen(); });
+  $('irisBtn').addEventListener('click', () => yukle(I.csvOku(IRIS), '<b>Iris (Fisher, 1936):</b> 3 süsen türünden 150 çiçeğin çanak (sepal) ve taç (petal) yaprağı uzunluk/genişlikleri (cm).'));
+  $('co2Btn').addEventListener('click', () => yukle(I.csvOku(CO2), '<b>CO2:</b> Quebec ve Mississippi kökenli <i>Echinochloa crus-galli</i> bitkilerinde, soğuğa maruz bırakılan (chilled) ve bırakılmayan (nonchilled) örneklerin CO₂ alım hızı (uptake) ve ortam CO₂ derişimi (conc).'));
+  I.birakmaAlani($('birak'), $('dosya'), async dosya => { try { yukle(await I.dosyaOku(dosya), `<b>Yüklenen dosya:</b> ${dosya.name}`); } catch (e) { alert('Dosya okunamadı: ' + e.message); } });
+  $('irisBtn').click();
+})();
+</script>
+</body>
+</html>

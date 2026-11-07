@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Örnekleme Yöntemleri ve Yanlılık · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .yontem-kart{background:var(--mavi);color:#fff;border-radius:14px;padding:18px}
+  .yontem-kart.yanli{background:#7f1d1d}
+  .yontem-kart .tur{font-size:11px;font-weight:800;letter-spacing:.12em;opacity:.8}
+  .yontem-kart h3{color:#fff;font-size:22px;margin:4px 0}
+  .yontem-kart p{margin:0;font-size:13px;opacity:.92}
+  .yanli-bolge{background:#1f2533;border-radius:14px;padding:16px;color:#fff}
+  .yanli-bolge .kb{color:#9aa3b2}
+  .yanli-bolge .btn{background:#2b3345;color:#fff;border-color:#3a4458;display:flex;justify-content:space-between;width:100%;margin-bottom:8px}
+  .yanli-bolge .btn.aktif{background:var(--kirmizi);border-color:var(--kirmizi)}
+  .izgara-yontem{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .izgara-yontem .btn.aktif{background:var(--mavi);color:#fff}
+  .ana{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+  @media (max-width:980px){.ana{grid-template-columns:1fr}}
+  .kar-tablo td.iyi{color:var(--yesil);font-weight:700}.kar-tablo td.kotu{color:var(--kirmizi);font-weight:700}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Örnekleme Yöntemleri ve Yanlılık</h1></a>
+  <div class="sag-ust"><a class="geri" href="#" id="yeniPop">↻ Popülasyonu Yenile</a><a class="geri" href="../index.html">← Tüm Uygulamalar</a></div>
+</header>
+
+<main class="icerik">
+  <div class="ana">
+    <div class="yigin">
+      <section class="kart">
+        <div class="grafik-ust">
+          <div><h2>Popülasyonun Görünümü</h2><div class="acik">Kampüsteki 1000 öğrenci. Her nokta bir öğrencidir; konumu kampüsteki yerini, rengi görüşünü gösterir. Arka plandaki bantlar sınıf düzeylerini (katmanlar) temsil eder.</div></div>
+          <span class="rozet r-gri">N = 1000</span>
+        </div>
+        <div class="tuval" id="tuvalPop"><button class="buyut" data-tuval="tuvalPop"></button><svg id="popSvg" viewBox="0 0 760 520"></svg></div>
+        <div class="lejant" style="margin-top:10px">
+          <span><i style="background:#1d2433"></i>Örnekleme seçilen</span><span><i style="background:#1d2433;box-shadow:0 0 0 2px #e11d48"></i>Seçilen güçlü görüş sahibi</span>
+          <span><i style="background:#e11d48"></i>Güçlü görüş sahibi</span>
+          <span><i style="background:#9ca3af"></i>Genel popülasyon</span>
+          <span><i style="background:#f59e0b;border-radius:2px"></i>Giriş kapısı (kolayda erişim noktası)</span>
+        </div>
+      </section>
+
+      <div class="izgara-3">
+        <div class="gosterge"><div class="e">Popülasyon Ortalaması (μ)</div><div class="d" id="mu">—</div><div class="a">Memnuniyet puanı (0–100)</div></div>
+        <div class="gosterge"><div class="e">Örneklem Ortalaması (x̄)</div><div class="d" id="xbar">—</div><div class="a" id="nBilgi">Henüz örneklem yok</div></div>
+        <div class="gosterge" id="yanKutu"><div class="e">Tahmini Hata (x̄ − μ)</div><div class="d" id="yan">—</div><div class="a" id="yanAcik">—</div></div>
+      </div>
+
+      <section class="kart">
+        <div class="grafik-ust">
+          <div><h2>Tekrarlı Örnekleme: Yanlılık mı, Şans mı?</h2><div class="acik">Tek bir örneklemin hatası şanstan da kaynaklanabilir. Yöntemi 500 kez tekrarlayınca <b>ortalama hata</b> (yanlılık) ile <b>dağılım genişliği</b> (değişkenlik) ayrışır.</div></div>
+          <button class="btn birincil" id="karsBtn">Tüm Yöntemleri 500 Kez Karşılaştır</button>
+        </div>
+        <div class="tuval"><svg id="karSvg" viewBox="0 0 760 300"></svg></div>
+        <table class="veri kar-tablo" style="margin-top:12px" id="karTablo"><thead><tr><th>Yöntem</th><th>x̄'lerin ortalaması</th><th>Yanlılık (ort. x̄ − μ)</th><th>Standart hata</th><th>Değerlendirme</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:var(--soluk)">Karşılaştırmak için düğmeye basın.</td></tr></tbody></table>
+      </section>
+    </div>
+
+    <aside class="yigin">
+      <div class="yontem-kart" id="yKart"><div class="tur" id="yTur">SEÇİLMEDİ</div><h3 id="yAd">Bir Yöntem Seçin</h3><p id="yAcik">Başlamak için aşağıdan bir örnekleme stratejisi seçin.</p></div>
+      <section class="kart">
+        <div class="bas"><p class="kb">Örneklem Büyüklüğü <span class="sb">(n)</span></p><span class="rozet r-gri" id="nR">n = 50</span></div>
+        <div class="kaydirici"><button class="pm" data-k="n" data-y="-1">−</button><input type="range" id="n" min="10" max="200" step="10" value="50"><button class="pm" data-k="n" data-y="1">+</button></div>
+        <div class="ayrac"></div>
+        <p class="kb">Olasılığa Dayalı (Doğru) Yöntemler</p>
+        <div class="izgara-yontem">
+          <button class="btn" data-y="bto">Basit Rastgele</button>
+          <button class="btn" data-y="tabakali">Tabakalı</button>
+          <button class="btn" data-y="kume">Küme</button>
+          <button class="btn" data-y="sistematik">Sistematik</button>
+        </div>
+        <p class="ipucu-k" style="margin-top:8px">Aynı yöntemi yeniden seçmek yeni bir örneklem çeker.</p>
+      </section>
+      <section class="yanli-bolge">
+        <p class="kb">Yanlılık Bölgesi</p>
+        <button class="btn" data-y="kolayda"><span>Kolayda Örnekleme Yanlılığı</span><span>⚠</span></button>
+        <button class="btn" data-y="gonullu"><span>Gönüllü Yanıt Yanlılığı</span><span>⚠</span></button>
+        <p style="font-size:11.5px;color:#9aa3b2;font-style:italic;margin:6px 0 0">* Yanlılık simülasyonu seçilme olasılıklarını değiştirerek "kötü verinin" istatistiksel tahmini nasıl çarpıttığını gösterir.</p>
+      </section>
+      <div class="not mavi" id="ders"><b>Kavram:</b> Yanlılık (bias), yöntemin <i>sistematik</i> olarak gerçek değerden sapmasıdır. Örneklemi büyütmek şans hatasını azaltır ama yanlılığı <b>gidermez</b>.</div>
+    </aside>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 02 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  const N = 1000, KATMAN = ['1. sınıf', '2. sınıf', '3. sınıf', '4. sınıf'], KAT_ORT = [41, 48, 55, 62];
+  const KAPI = {x: 4, y: 4};
+  const YONTEM = {
+    bto: {ad: 'Basit Rastgele Örnekleme (BRÖ)', tur: 'RASTGELE', acik: 'Her bireyin seçilme şansı tamamen eşittir — şapkadan isim çekmek gibi.'},
+    tabakali: {ad: 'Tabakalı Örnekleme', tur: 'RASTGELE', acik: 'Popülasyon tabakalara (sınıf düzeyleri) ayrılır ve her tabakadan büyüklüğüyle orantılı rastgele örneklem çekilir.'},
+    kume: {ad: 'Küme Örneklemesi', tur: 'RASTGELE', acik: 'Kampüs 25 kümeye (bloklara) bölünür. Rastgele kümeler seçilir ve seçilen kümelerdeki herkes örnekleme alınır.'},
+    sistematik: {ad: 'Sistematik Örnekleme', tur: 'RASTGELE', acik: 'Liste rastgele bir başlangıçtan itibaren her k-ıncı kişi seçilerek taranır (ör. her 20. öğrenci).'},
+    kolayda: {ad: 'Kolayda Örnekleme Yanlılığı', tur: 'YANLILIK', acik: 'Yalnızca ulaşılması en kolay kişiler örnekleme alınır (ör. giriş kapısının yanında duranlar).'},
+    gonullu: {ad: 'Gönüllü Yanıt Yanlılığı', tur: 'YANLILIK', acik: 'Örneklem, kendini seçen kişilerden oluşur (ör. çevrim içi anketler, yorumlar). Güçlü görüş sahipleri yanıt vermeye çok daha yatkındır.'}
+  };
+  let pop = [], mu = 0, secili = new Set(), yontem = null;
+
+  function popUret() {
+    pop = [];
+    for (let i = 0; i < N; i++) {
+      const y = Math.random() * 100, x = Math.random() * 100;
+      const k = Math.min(3, Math.floor(y / 25));
+      const guclu = Math.random() < 0.10;
+      // kapıya yakın olanlar genelde alt sınıflar ve biraz daha düşük memnuniyet
+      let deger = guclu ? 22 + 9 * I.rnorm() : KAT_ORT[k] + 0.08 * (x - 50) + 9 * I.rnorm();
+      deger = Math.max(0, Math.min(100, deger));
+      pop.push({x, y, k, guclu, deger, kume: Math.min(4, Math.floor(x / 20)) + 5 * Math.min(4, Math.floor(y / 20))});
+    }
+    // sistematik sıra: öğrenci numarası (rastgele bir liste sırası)
+    I.karistir(pop.map((_, i) => i)).forEach((p, s) => pop[p].sira = s);
+    mu = I.ort(pop.map(p => p.deger));
+    $('mu').textContent = f(mu, 2);
+  }
+
+  function orneklemCek(y, n) {
+    const idx = pop.map((_, i) => i);
+    if (y === 'bto') return I.karistir(idx).slice(0, n);
+    if (y === 'tabakali') {
+      const s = [];
+      for (let k = 0; k < 4; k++) { const g = idx.filter(i => pop[i].k === k); s.push(...I.karistir(g).slice(0, Math.round(n * g.length / N))); }
+      return s;
+    }
+    if (y === 'kume') {
+      const kumeler = I.karistir([...Array(25).keys()]); const s = [];
+      for (const c of kumeler) { if (s.length >= n) break; s.push(...idx.filter(i => pop[i].kume === c)); }
+      return s;
+    }
+    if (y === 'sistematik') {
+      const sirali = idx.slice().sort((a, b) => pop[a].sira - pop[b].sira); const k = N / n; const bas = Math.random() * k; const s = [];
+      for (let j = 0; j < n; j++) s.push(sirali[Math.floor(bas + j * k)]);
+      return s;
+    }
+    if (y === 'kolayda') {
+      const d = i => Math.hypot(pop[i].x - KAPI.x, pop[i].y - KAPI.y) + Math.random() * 6;
+      return idx.map(i => [i, d(i)]).sort((a, b) => a[1] - b[1]).slice(0, n).map(a => a[0]);
+    }
+    if (y === 'gonullu') { // ağırlıklı seçim: güçlü görüş sahipleri 15 kat daha olası
+      const w = idx.map(i => pop[i].guclu ? 15 : 1); const s = []; const kalan = new Set(idx);
+      while (s.length < n) { let top = 0; kalan.forEach(i => top += w[i]); let r = Math.random() * top;
+        for (const i of kalan) { r -= w[i]; if (r <= 0) { s.push(i); kalan.delete(i); break; } } }
+      return s;
+    }
+  }
+
+  // ---------- Popülasyon grafiği ----------
+  const svg = $('popSvg'), W = 760, H = 520, P = 20;
+  const sx = x => P + x / 100 * (W - 2 * P), sy = y => P + y / 100 * (H - 2 * P);
+  const RENK_KAT = ['#eef4fb', '#f5f9fd', '#eef4fb', '#f5f9fd'];
+  function popCiz() {
+    svg.innerHTML = '';
+    for (let k = 0; k < 4; k++) {
+      el('rect', {x: sx(0), y: sy(k * 25), width: sx(100) - sx(0), height: sy(25) - sy(0), fill: yontem === 'tabakali' ? ['#dbeafe', '#e0f2fe', '#ede9fe', '#fce7f3'][k] : RENK_KAT[k]}, svg);
+      el('text', {x: sx(100) - 6, y: sy(k * 25) + 14, 'text-anchor': 'end', 'font-size': 11, fill: '#64748b', 'font-weight': 700}, svg, KATMAN[k] + (yontem === 'tabakali' ? ' (tabaka)' : ''));
+    }
+    if (yontem === 'kume') for (let c = 0; c <= 5; c++) {
+      el('line', {x1: sx(c * 20), x2: sx(c * 20), y1: sy(0), y2: sy(100), stroke: '#94a3b8', 'stroke-dasharray': '4 3'}, svg);
+      el('line', {y1: sy(c * 20), y2: sy(c * 20), x1: sx(0), x2: sx(100), stroke: '#94a3b8', 'stroke-dasharray': '4 3'}, svg);
+    }
+    if (yontem === 'kume') { const kumeler = new Set([...secili].map(i => pop[i].kume));
+      kumeler.forEach(c => el('rect', {x: sx((c % 5) * 20), y: sy(Math.floor(c / 5) * 20), width: sx(20) - sx(0), height: sy(20) - sy(0), fill: 'rgba(11,74,139,.10)', stroke: '#0b4a8b', 'stroke-width': 2}, svg)); }
+    // kapı
+    el('rect', {x: sx(0) - 2, y: sy(0) - 2, width: 30, height: 30, rx: 4, fill: '#f59e0b'}, svg);
+    el('text', {x: sx(0) + 13, y: sy(0) + 18, 'text-anchor': 'middle', 'font-size': 14}, svg, '🚪');
+    if (yontem === 'kolayda') el('circle', {cx: sx(KAPI.x), cy: sy(KAPI.y), r: Math.sqrt(+$('n').value / N / Math.PI * 4) * (W - 2 * P) * 1.05, fill: 'rgba(245,158,11,.12)', stroke: '#f59e0b', 'stroke-dasharray': '5 4'}, svg);
+    pop.forEach((p, i) => {
+      if (secili.has(i)) return;
+      el('circle', {cx: sx(p.x), cy: sy(p.y), r: p.guclu ? 3.6 : 2.6, fill: p.guclu ? '#e11d48' : '#9ca3af', 'fill-opacity': p.guclu ? .75 : .55}, svg);
+    });
+    secili.forEach(i => { const p = pop[i];
+      el('circle', {cx: sx(p.x), cy: sy(p.y), r: 6, fill: '#1d2433', stroke: p.guclu ? '#e11d48' : '#fff', 'stroke-width': p.guclu ? 2.5 : 1.5}, svg); });
+  }
+
+  async function sec(y) {
+    yontem = y; const n = +$('n').value;
+    document.querySelectorAll('[data-y]').forEach(b => b.classList.toggle('aktif', b.dataset.y === y));
+    const Y = YONTEM[y];
+    $('yAd').textContent = Y.ad; $('yTur').textContent = (Y.tur === 'YANLILIK' ? '⚠ ' : '') + Y.tur; $('yAcik').textContent = Y.acik;
+    $('yKart').classList.toggle('yanli', Y.tur === 'YANLILIK');
+    const s = orneklemCek(y, n); secili = new Set();
+    // kısa animasyon
+    const adim = Math.max(1, Math.ceil(s.length / 25));
+    for (let j = 0; j < s.length; j += adim) { s.slice(j, j + adim).forEach(i => secili.add(i)); popCiz(); await I.bekle(16); }
+    secili = new Set(s); popCiz();
+    const xb = I.ort(s.map(i => pop[i].deger)), h = xb - mu;
+    $('xbar').textContent = f(xb, 2);
+    $('nBilgi').textContent = `n = ${s.length} öğrenci · güçlü görüş: ${s.filter(i => pop[i].guclu).length}`;
+    $('yan').textContent = I.isaretli(h, 2);
+    const se = I.sd(pop.map(p => p.deger)) / Math.sqrt(s.length);
+    const buyuk = Math.abs(h) > 2 * se;
+    $('yan').style.color = buyuk ? 'var(--kirmizi)' : 'var(--yesil)';
+    $('yanKutu').style.background = buyuk ? 'var(--kirmizi-acik)' : 'var(--yesil-acik)';
+    $('yanAcik').textContent = buyuk ? `Beklenen şans hatasından (±${f(2 * se, 1)}) büyük` : `Şans hatası sınırları içinde (±${f(2 * se, 1)})`;
+  }
+  document.querySelectorAll('[data-y]').forEach(b => b.addEventListener('click', () => sec(b.dataset.y)));
+  $('n').addEventListener('input', () => { $('nR').textContent = 'n = ' + $('n').value; });
+  $('n').addEventListener('change', () => yontem && sec(yontem));
+  $('yeniPop').addEventListener('click', e => { e.preventDefault(); popUret(); secili = new Set(); yontem = null;
+    document.querySelectorAll('[data-y]').forEach(b => b.classList.remove('aktif'));
+    $('xbar').textContent = '—'; $('yan').textContent = '—'; $('yanAcik').textContent = '—'; $('nBilgi').textContent = 'Henüz örneklem yok';
+    $('yanKutu').style.background = ''; popCiz(); karSifirla(); });
+
+  // ---------- Karşılaştırma ----------
+  const SIRA = ['bto', 'tabakali', 'kume', 'sistematik', 'kolayda', 'gonullu'];
+  const KISA = {bto: 'Basit Rastgele', tabakali: 'Tabakalı', kume: 'Küme', sistematik: 'Sistematik', kolayda: 'Kolayda', gonullu: 'Gönüllü'};
+  function karSifirla() { $('karSvg').innerHTML = ''; el('text', {x: 380, y: 150, 'text-anchor': 'middle', fill: '#999', 'font-style': 'italic', 'font-family': 'Georgia,serif'}, $('karSvg'), 'Karşılaştırma için düğmeye basın');
+    $('karTablo').tBodies[0].innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--soluk)">Karşılaştırmak için düğmeye basın.</td></tr>'; }
+  $('karsBtn').addEventListener('click', async () => {
+    $('karsBtn').disabled = true; $('karsBtn').textContent = 'Hesaplanıyor…'; await I.bekle(20);
+    const n = +$('n').value, R = 500, sonuc = {};
+    for (const y of SIRA) { const xs = []; for (let r = 0; r < R; r++) xs.push(I.ort(orneklemCek(y, n).map(i => pop[i].deger))); sonuc[y] = xs; await I.bekle(0); }
+    const s = $('karSvg'); s.innerHTML = '';
+    const W2 = 760, H2 = 300, L = 120, R2 = 20, T = 14, B = 40;
+    const tum = Object.values(sonuc).flat(); const lo = Math.min(...tum, mu - 5), hi = Math.max(...tum, mu + 5);
+    const x = I.olcek(lo, hi, L, W2 - R2), satH = (H2 - T - B) / SIRA.length;
+    I.eksenler(s, {W: W2, H: H2, L, R: R2, T, B, x, xt: I.tikler(lo, hi, 8), yt: [], xEt: 'Örneklem ortalamaları (x̄)', izgara: false, yEksen: false});
+    el('line', {x1: x(mu), x2: x(mu), y1: T, y2: H2 - B, stroke: '#0b4a8b', 'stroke-width': 2, 'stroke-dasharray': '5 4'}, s);
+    el('text', {x: x(mu), y: T + 2, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#0b4a8b', ...I.halo}, s, 'μ = ' + f(mu, 1));
+    const rows = [];
+    SIRA.forEach((y, j) => {
+      const xs = sonuc[y], cy = T + 10 + satH * j + satH / 2, yanli = y === 'kolayda' || y === 'gonullu';
+      el('text', {x: L - 10, y: cy + 4, 'text-anchor': 'end', 'font-size': 12, 'font-weight': 700, fill: yanli ? '#c8202e' : '#1d2433'}, s, KISA[y]);
+      xs.forEach(v => el('circle', {cx: x(v), cy: cy + (Math.random() - .5) * satH * .6, r: 2, fill: yanli ? '#c8202e' : '#0b4a8b', 'fill-opacity': .25}, s));
+      const m = I.ort(xs); el('line', {x1: x(m), x2: x(m), y1: cy - satH * .4, y2: cy + satH * .4, stroke: '#111', 'stroke-width': 2.5}, s);
+      const b = m - mu, se = I.sd(xs);
+      const deg = Math.abs(b) > 1.5 ? ['kotu', 'Yanlı — sistematik sapma'] : se > 2.2 ? ['', 'Yansız ama değişken'] : ['iyi', 'Yansız ve isabetli'];
+      rows.push(`<tr><td>${KISA[y]}</td><td>${f(m, 2)}</td><td class="${Math.abs(b) > 1.5 ? 'kotu' : 'iyi'}">${I.isaretli(b, 2)}</td><td>${f(se, 2)}</td><td class="${deg[0]}">${deg[1]}</td></tr>`);
+    });
+    $('karTablo').tBodies[0].innerHTML = rows.join('');
+    $('karsBtn').disabled = false; $('karsBtn').textContent = 'Tüm Yöntemleri 500 Kez Karşılaştır';
+  });
+
+  popUret(); popCiz(); karSifirla();
+})();
+</script>
+</body>
+</html>

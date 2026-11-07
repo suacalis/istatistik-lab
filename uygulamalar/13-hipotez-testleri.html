@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İstatistik Laboratuvarı: Hipotez Testleri ve Karar Hataları</title>
+<style>
+  :root{
+    --mavi:#0b4a8b; --mavi-acik:#e8f0fa; --kirmizi:#c8202e; --kirmizi-acik:#fdecee;
+    --yesil:#14966f; --yesil-acik:#e6f6f0; --zemin:#f3f3f1; --kart:#fff; --metin:#1d2433;
+    --soluk:#6b7280; --kenar:#e5e7eb; --mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--zemin);color:var(--metin)}
+  header{display:flex;align-items:stretch;justify-content:space-between;background:#fff;border-bottom:1px solid var(--kenar);padding:0 0 0 24px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .logo .ikon{width:38px;height:38px;border-radius:8px;background:var(--kirmizi);display:grid;place-items:center}
+  .logo h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:20px;color:var(--mavi)}
+  .sekmeler{display:flex}
+  .sekme{border:0;background:none;padding:0 26px;font-size:14px;font-weight:600;color:var(--soluk);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;gap:8px}
+  .sekme.aktif{color:var(--mavi);border-bottom-color:var(--mavi);background:var(--mavi-acik)}
+  .panel{display:none;padding:24px;gap:24px;grid-template-columns:330px 1fr;align-items:start;max-width:1400px;margin:0 auto}
+  .panel.aktif{display:grid}
+  .kart{background:var(--kart);border:1px solid var(--kenar);border-radius:14px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .kb .sb{text-transform:none;font-family:Georgia,serif;font-style:italic}
+  .kb{font-size:12.5px;font-weight:800;letter-spacing:.06em;color:var(--mavi);text-transform:uppercase;margin:0}
+  .acik{font-size:12px;color:var(--soluk);margin:5px 0 10px;line-height:1.45}
+  .blok{padding:16px 0;border-bottom:1px solid var(--kenar)}
+  .blok:first-child{padding-top:0}
+  .blok:last-child{border-bottom:0}
+  .bas{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .rozet{font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .r-mavi{background:var(--mavi-acik);color:var(--mavi)}
+  .r-kirmizi{background:var(--kirmizi-acik);color:var(--kirmizi)}
+  .r-yesil{background:var(--yesil-acik);color:var(--yesil)}
+  .r-gri{background:#f1f1f1;color:#333}
+  .kaydirici{display:flex;align-items:center;gap:8px}
+  .kaydirici button{width:28px;height:28px;border:1px solid var(--kenar);background:#fff;border-radius:6px;cursor:pointer;font-size:16px;line-height:1;color:#333;flex:none}
+  .kaydirici button:hover{border-color:var(--mavi)}
+  input[type=range]{flex:1;min-width:0}
+  .ac-mavi{accent-color:var(--mavi)} .ac-kirmizi{accent-color:var(--kirmizi)} .ac-yesil{accent-color:var(--yesil)}
+  .yon{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .yon button{border:1px solid var(--kenar);background:#fff;border-radius:8px;padding:12px 4px;cursor:pointer;text-align:center}
+  .yon button b{display:block;font-family:Georgia,serif;font-size:16px;color:#555}
+  .yon button span{font-size:11.5px;color:var(--soluk)}
+  .yon button.aktif{border-color:var(--mavi);background:var(--mavi-acik);box-shadow:inset 0 0 0 1px var(--mavi)}
+  .yon button.aktif b{color:var(--mavi)}
+  .hesap{background:#f7f7f6;border:1px solid var(--kenar);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12.5px}
+  .hesap .s{display:flex;justify-content:space-between;margin:5px 0}
+  .hesap b{color:var(--mavi)}
+  .pkutu{margin-top:14px;border-radius:12px;padding:16px;text-align:center;color:#fff;background:var(--mavi)}
+  .pkutu .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .pkutu .f{font-family:var(--mono);font-size:12.5px;margin-top:4px;opacity:.9}
+  .pkutu .d{font-family:Georgia,serif;font-size:38px;font-weight:700;margin:4px 0}
+  .pkutu .karar{font-size:11.5px;font-weight:800;letter-spacing:.08em;padding:5px 10px;border-radius:999px;display:inline-block;background:rgba(255,255,255,.18)}
+  .alfa-sec{display:flex;gap:6px;margin-top:8px}
+  .alfa-sec button{flex:1;border:1px solid var(--kenar);background:#fff;border-radius:6px;padding:6px;font-family:var(--mono);font-size:12px;cursor:pointer}
+  .alfa-sec button.aktif{background:var(--mavi);color:#fff;border-color:var(--mavi)}
+  .grafik-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid var(--kenar);padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap}
+  .grafik-ust p{margin:5px 0 0;font-size:12.5px;color:var(--soluk)}
+  .tuval{position:relative;background:#fafafa;border:1px solid var(--kenar);border-radius:12px;padding:12px}
+  .tuval svg{width:100%;display:block}
+  .buyut{position:absolute;top:12px;right:12px;width:34px;height:34px;border:1px solid var(--kenar);border-radius:8px;background:#fff;cursor:pointer;display:grid;place-items:center;z-index:2}
+  .tuval:fullscreen{background:#fff;padding:40px;display:flex;align-items:center}
+  .ozet{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;background:#f7f7f6;border:1px solid var(--kenar);border-radius:10px;padding:14px 16px;font-size:12.5px}
+  .ozet .e{font-family:var(--mono);color:var(--soluk);font-size:11.5px;margin-bottom:4px}
+  .ozet .v{font-weight:700}
+  .lejant{display:flex;gap:16px;font-family:var(--mono);font-size:11.5px;color:#444}
+  .lejant span{display:flex;align-items:center;gap:6px}
+  .halka{width:11px;height:11px;border-radius:50%;border:2px solid}
+  .skor{border-radius:10px;padding:12px 14px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid}
+  .skor .ad{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .skor .alt{font-size:11px;color:var(--soluk);margin-left:16px}
+  .skor .yuzde{font-family:var(--mono);font-size:20px;font-weight:800;text-align:right}
+  .skor .pp{font-family:var(--mono);font-size:10.5px;color:var(--soluk);text-align:right}
+  .skor .nk{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .s1{background:var(--kirmizi-acik);border-color:#f5c4c9}.s1 .yuzde{color:var(--kirmizi)}.s1 .nk{background:var(--kirmizi)}
+  .s2{background:#eef3fb;border-color:#c9d8ee}.s2 .yuzde{color:var(--mavi)}.s2 .nk{background:var(--mavi)}
+  .s3{background:var(--yesil-acik);border-color:#bfe6d7}.s3 .yuzde{color:var(--yesil)}.s3 .nk{background:var(--yesil)}
+  .icgoru{display:flex;gap:12px;margin-top:16px;border:1px solid var(--kenar);border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.55;background:#fbfbfb}
+  .icgoru .et{background:var(--mavi);color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 7px;border-radius:4px;height:fit-content}
+  .karar-tablo{width:100%;border-collapse:collapse;margin-top:16px;font-size:12.5px}
+  .karar-tablo th,.karar-tablo td{border:1px solid var(--kenar);padding:9px 10px;text-align:center}
+  .karar-tablo th{background:#f7f7f6;font-weight:700}
+  .karar-tablo .hata1{background:var(--kirmizi-acik);color:var(--kirmizi);font-weight:700}
+  .karar-tablo .hata2{background:#eef3fb;color:var(--mavi);font-weight:700}
+  .karar-tablo .dogru{background:var(--yesil-acik);color:var(--yesil);font-weight:700}
+  @media (max-width:960px){.panel.aktif{grid-template-columns:1fr}.ozet{grid-template-columns:1fr}.sekme{padding:12px 14px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html" style="text-decoration:none">
+    <div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div>
+    <h1>İstatistik Laboratuvarı: Hipotez Testleri ve Karar Hataları</h1>
+  </a>
+  <div style="display:flex;align-items:stretch;flex-wrap:wrap">
+  <nav class="sekmeler">
+    <button class="sekme aktif" data-hedef="p1">🔍 Sekme 1: p-Değeri Dedektifi</button>
+    <button class="sekme" data-hedef="p2">⚖️ Sekme 2: Hata Halat Çekişi</button>
+  </nav>
+  <a href="../index.html" style="display:flex;align-items:center;padding:0 18px;border-left:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;text-decoration:none">← Tüm Uygulamalar</a>
+  </div>
+</header>
+
+<!-- ===================== SEKME 1 ===================== -->
+<section class="panel aktif" id="p1">
+  <div class="kart">
+    <div class="blok">
+      <p class="kb">Hipotez Seçimi (Tek Oran <span class="sb">z</span>-Testi)</p>
+      <p class="acik">Alternatif hipotezin (H<sub>a</sub>) yönünü seçin.</p>
+      <div class="yon" id="yonSec">
+        <button data-yon="sol"><b>H<sub>a</sub>: p &lt; p<sub>0</sub></b><span>Sol Kuyruklu</span></button>
+        <button data-yon="sag" class="aktif"><b>H<sub>a</sub>: p &gt; p<sub>0</sub></b><span>Sağ Kuyruklu</span></button>
+        <button data-yon="iki"><b>H<sub>a</sub>: p ≠ p<sub>0</sub></b><span>Çift Kuyruklu</span></button>
+      </div>
+    </div>
+    <div class="blok">
+      <div class="bas"><p class="kb">Sıfır Hipotezi Oranı <span class="sb">(p<sub>0</sub>)</span></p><span class="rozet r-mavi" id="p0R">p₀ = 0,50</span></div>
+      <p class="acik">Sıfır hipotezi altında iddia edilen popülasyon oranı (H<sub>0</sub>: p = p<sub>0</sub>).</p>
+      <div class="kaydirici"><button data-k="p0" data-y="-1">−</button><input type="range" class="ac-mavi" id="p0" min="0.05" max="0.95" step="0.01" value="0.50"><button data-k="p0" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <div class="bas"><p class="kb">Gözlenen Örneklem Oranı <span class="sb">(p̂)</span></p><span class="rozet r-kirmizi" id="phR">p̂ = 0,62</span></div>
+      <p class="acik">Araştırma örnekleminizde doğrudan gözlenen başarı oranı.</p>
+      <div class="kaydirici"><button data-k="ph" data-y="-1">−</button><input type="range" class="ac-kirmizi" id="ph" min="0.05" max="0.95" step="0.01" value="0.62"><button data-k="ph" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <div class="bas"><p class="kb">Örneklem Büyüklüğü <span class="sb">(n)</span></p><span class="rozet r-gri" id="n1R">n = 100</span></div>
+      <p class="acik">Örneklem büyüdükçe örnekleme varyansı azalır ve Standart Hata küçülür!</p>
+      <div class="kaydirici"><button data-k="n1" data-y="-1">−</button><input type="range" class="ac-mavi" id="n1" min="10" max="1000" step="10" value="100"><button data-k="n1" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <p class="kb">Anlamlılık Düzeyi <span class="sb">(α)</span></p>
+      <div class="alfa-sec" id="alfa1Sec">
+        <button data-a="0.01">α = 0,01</button><button data-a="0.05" class="aktif">α = 0,05</button><button data-a="0.10">α = 0,10</button>
+      </div>
+    </div>
+    <div class="hesap">
+      <div class="s"><span>Standart Hata (SH):</span><b id="se1">0,0500</b></div>
+      <div class="s"><span>Hesaplanan z istatistiği:</span><b id="z1">2,40</b></div>
+      <div class="s"><span>Kritik değer:</span><b id="zk1">1,645</b></div>
+    </div>
+    <div class="pkutu" id="pKutu">
+      <div class="k">Sonuç Olasılık Haritası</div>
+      <div class="f" id="pForm">p-değeri = P(Z &gt; 2,40)</div>
+      <div class="d" id="pDeg">0,0082</div>
+      <div class="karar" id="pKarar">İSTATİSTİKSEL OLARAK ANLAMLI (α = %5)</div>
+    </div>
+  </div>
+
+  <div class="kart">
+    <div class="grafik-ust">
+      <div>
+        <p class="kb">Standart Normal Dağılım Grafiği <span class="sb">Z ~ N(0, 1)</span></p>
+        <p>Taralı kuyruklar, standart normal eğriye göre hesaplanan p-değeri bölgesini gösterir. Kesikli kırmızı çizgiler α düzeyindeki kritik değer(ler)dir.</p>
+      </div>
+    </div>
+    <div class="tuval" id="tuval1">
+      <button class="buyut" title="Tam ekran" data-tuval="tuval1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+      <svg id="svg1" viewBox="0 0 760 320"></svg>
+    </div>
+    <div class="ozet">
+      <div><div class="e">H₀ İddiası ve Örneklem:</div><div class="v" id="oz1">p₀ = 0,50 ve p̂ = 0,62</div></div>
+      <div><div class="e">Hesaplanan Standart Hata:</div><div class="v" id="oz2">SH = 0,0500</div></div>
+      <div><div class="e" id="oz3e">Ret Kararı (α = 0,05):</div><div class="v" id="oz3">Güçlü Kanıt – H₀ Reddedilir</div></div>
+    </div>
+    <div class="icgoru">
+      <span class="et">FORMÜL</span>
+      <div>z = (p̂ − p₀) / √[p₀(1 − p₀) / n]. Standart hata, H₀ doğru varsayılarak p₀ ile hesaplanır. p-değeri, H₀ doğruyken en az gözlenen kadar uç bir sonuç elde etme olasılığıdır; p ≤ α ise H₀ reddedilir. Normal yaklaşımın geçerliliği için np₀ ≥ 10 ve n(1 − p₀) ≥ 10 olmalıdır: <b id="kosul">sağlanıyor</b>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SEKME 2 ===================== -->
+<section class="panel" id="p2">
+  <div class="kart">
+    <div class="blok">
+      <div class="bas"><p class="kb">Anlamlılık Düzeyi <span class="sb">(α)</span></p><span class="rozet r-kirmizi" id="aR">α = 0,050</span></div>
+      <p class="acik">Kabul edilebilir I. Tip Hata oranını (yanlış ret oranı) belirler.</p>
+      <div class="kaydirici"><button data-k="a2" data-y="-1">−</button><input type="range" class="ac-kirmizi" id="a2" min="0.01" max="0.20" step="0.01" value="0.05"><button data-k="a2" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <div class="bas"><p class="kb">Sıfır Hipotezi Oranı <span class="sb">(p<sub>0</sub>)</span></p><span class="rozet r-mavi" id="p02R">p₀ = 0,50</span></div>
+      <p class="acik">Sıfır hipotezi dağılımının merkezi (H<sub>0</sub>'ı temsil eder).</p>
+      <div class="kaydirici"><button data-k="p02" data-y="-1">−</button><input type="range" class="ac-mavi" id="p02" min="0.10" max="0.90" step="0.01" value="0.50"><button data-k="p02" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <div class="bas"><p class="kb">Gerçek Oran <span class="sb">(p)</span></p><span class="rozet r-yesil" id="ptR">p = 0,62</span></div>
+      <p class="acik">Gerçek popülasyon oranı (alternatif H<sub>a</sub> eğrisini tanımlar). Fark büyüdükçe güç artar.</p>
+      <div class="kaydirici"><button data-k="pt" data-y="-1">−</button><input type="range" class="ac-yesil" id="pt" min="0.10" max="0.90" step="0.01" value="0.62"><button data-k="pt" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <div class="bas"><p class="kb">Örneklem Büyüklüğü <span class="sb">(n)</span></p><span class="rozet r-gri" id="n2R">n = 100</span></div>
+      <p class="acik">Standart sapmayı denetler. Büyük örneklem eğrileri daraltır ve HER İKİ hata alanını da küçültür!</p>
+      <div class="kaydirici"><button data-k="n2" data-y="-1">−</button><input type="range" class="ac-mavi" id="n2" min="20" max="800" step="20" value="100"><button data-k="n2" data-y="1">+</button></div>
+    </div>
+    <div class="blok">
+      <p class="kb">Canlı İstatistik Skor Tablosu</p>
+      <div class="skor s1"><div><div class="ad"><i class="nk"></i>I. Tip Hata (α)</div><div class="alt">Yanlış Alarm Oranı</div></div><div><div class="yuzde" id="sk1">%5,0</div><div class="pp" id="sk1p">p = 0,050</div></div></div>
+      <div class="skor s2"><div><div class="ad"><i class="nk"></i>II. Tip Hata (β)</div><div class="alt">Kaçırılan Tespit Oranı</div></div><div><div class="yuzde" id="sk2">%21,8</div><div class="pp" id="sk2p">p = 0,218</div></div></div>
+      <div class="skor s3"><div><div class="ad"><i class="nk"></i>Güç (1 − β)</div><div class="alt">Doğru Ret Olasılığı</div></div><div><div class="yuzde" id="sk3">%78,2</div><div class="pp" id="sk3p">p = 0,782</div></div></div>
+    </div>
+  </div>
+
+  <div class="kart">
+    <div class="grafik-ust">
+      <div>
+        <p class="kb">Üst Üste Karar Sınırı Modeli</p>
+        <p id="kritikMetin">Kritik Oran Sınırı p<sub>krit</sub> = 0,582.</p>
+      </div>
+      <div class="lejant">
+        <span><i class="halka" style="border-color:var(--mavi)"></i>Sıfır H₀ (p₀)</span>
+        <span><i class="halka" style="border-color:var(--yesil)"></i>Alternatif Hₐ (p)</span>
+      </div>
+    </div>
+    <div class="tuval" id="tuval2">
+      <button class="buyut" title="Tam ekran" data-tuval="tuval2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+      <svg id="svg2" viewBox="0 0 760 340"></svg>
+    </div>
+    <div class="icgoru">
+      <span class="et">İÇGÖRÜ</span>
+      <div id="icgoru2">Tek oran <b>z-testinde</b> örneklem büyüklüğü <i>n</i> arttıkça her iki standart hata da küçülür. Bu "sıkıştırma" etkisi eğrileri birbirinden ayırır; böylece <b style="color:var(--kirmizi)">I. Tip</b> α sabit tutulurken <b style="color:var(--mavi)">II. Tip Hata</b> riski azalır ve testin <b style="color:var(--yesil)">istatistiksel gücü (1 − β)</b> artar. α'yı küçültmek ise kritik sınırı dışarı iter: yanlış alarm azalır ama β büyür — işte halat çekişi budur.</div>
+    </div>
+    <table class="karar-tablo">
+      <tr><th>Karar \ Gerçek durum</th><th>H₀ doğru</th><th>H₀ yanlış (Hₐ doğru)</th></tr>
+      <tr><th>H₀ reddedilir</th><td class="hata1">I. Tip Hata (α) — <span id="t1">%5,0</span></td><td class="dogru">Doğru karar: Güç (1 − β) — <span id="t3">%78,2</span></td></tr>
+      <tr><th>H₀ reddedilemez</th><td class="dogru">Doğru karar (1 − α) — <span id="t4">%95,0</span></td><td class="hata2">II. Tip Hata (β) — <span id="t2">%21,8</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<div style="text-align:center;font-size:12px;color:#6b7280;padding:22px 16px 30px">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 13 — <a href="../index.html" style="color:#6b7280">Portala dön</a></div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, at = {}, par) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (par) par.appendChild(e); return e; };
+  const f = (v, d) => v.toLocaleString('tr-TR', {minimumFractionDigits: d, maximumFractionDigits: d});
+  const yz = (v, d = 1) => '%' + f(v * 100, d);
+
+  // ---- Normal dağılım fonksiyonları ----
+  const phi = x => Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI);
+  function Phi(x){ // Hart / W. J. Cody yaklaşımı (yüksek doğruluk)
+    const z = Math.abs(x), t = 1 / (1 + 0.2316419 * z);
+    const p = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+    const c = 1 - phi(z) * p;
+    return x >= 0 ? c : 1 - c;
+  }
+  function invPhi(p){ // Acklam algoritması
+    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
+          b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+          c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+          d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    const pl = 0.02425; let q, r;
+    if (p < pl){ q = Math.sqrt(-2 * Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+    if (p > 1 - pl){ q = Math.sqrt(-2 * Math.log(1 - p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+    q = p - 0.5; r = q * q;
+    return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+  }
+
+  // ---- Sekmeler ----
+  document.querySelectorAll('.sekme').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.sekme').forEach(x => x.classList.toggle('aktif', x === b));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('aktif', p.id === b.dataset.hedef));
+  }));
+  // ---- ± düğmeleri ----
+  document.querySelectorAll('.kaydirici button').forEach(b => b.addEventListener('click', () => {
+    const inp = $(b.dataset.k), adim = +inp.step;
+    const v = Math.min(+inp.max, Math.max(+inp.min, +inp.value + adim * +b.dataset.y));
+    inp.value = +v.toFixed(4); inp.dispatchEvent(new Event('input'));
+  }));
+  // ---- Tam ekran ----
+  document.querySelectorAll('.buyut').forEach(b => b.addEventListener('click', () => {
+    const t = $(b.dataset.tuval);
+    if (document.fullscreenElement) document.exitFullscreen(); else if (t.requestFullscreen) t.requestFullscreen();
+  }));
+
+  // ===================== SEKME 1 =====================
+  let yon = 'sag', alfa1 = 0.05;
+  document.querySelectorAll('#yonSec button').forEach(b => b.addEventListener('click', () => {
+    yon = b.dataset.yon;
+    document.querySelectorAll('#yonSec button').forEach(x => x.classList.toggle('aktif', x === b));
+    ciz1();
+  }));
+  document.querySelectorAll('#alfa1Sec button').forEach(b => b.addEventListener('click', () => {
+    alfa1 = +b.dataset.a;
+    document.querySelectorAll('#alfa1Sec button').forEach(x => x.classList.toggle('aktif', x === b));
+    ciz1();
+  }));
+  ['p0', 'ph', 'n1'].forEach(id => $(id).addEventListener('input', ciz1));
+
+  function ciz1(){
+    const p0 = +$('p0').value, ph = +$('ph').value, n = +$('n1').value;
+    const se = Math.sqrt(p0 * (1 - p0) / n);
+    const z = (ph - p0) / se;
+    let p, form, zk;
+    if (yon === 'sol'){ p = Phi(z); form = `p-değeri = P(Z < ${f(z, 2)})`; zk = invPhi(alfa1); }
+    else if (yon === 'sag'){ p = 1 - Phi(z); form = `p-değeri = P(Z > ${f(z, 2)})`; zk = invPhi(1 - alfa1); }
+    else { p = 2 * (1 - Phi(Math.abs(z))); form = `p-değeri = 2 · P(Z > |${f(z, 2)}|)`; zk = invPhi(1 - alfa1 / 2); }
+    p = Math.min(1, Math.max(0, p));
+    const anlamli = p <= alfa1;
+
+    $('p0R').textContent = 'p₀ = ' + f(p0, 2);
+    $('phR').textContent = 'p̂ = ' + f(ph, 2);
+    $('n1R').textContent = 'n = ' + n;
+    $('se1').textContent = f(se, 4);
+    $('z1').textContent = f(z, 2);
+    $('zk1').textContent = (yon === 'iki' ? '±' : '') + f(yon === 'iki' ? Math.abs(zk) : zk, 3);
+    $('pForm').textContent = form;
+    $('pDeg').textContent = p < 0.0001 ? '< 0,0001' : f(p, 4);
+    const aY = '%' + f(alfa1 * 100, 0);
+    $('pKarar').textContent = anlamli ? `İSTATİSTİKSEL OLARAK ANLAMLI (α = ${aY})` : `ANLAMLI DEĞİL (α = ${aY})`;
+    $('pKutu').style.background = anlamli ? 'var(--mavi)' : '#5b6472';
+    $('oz1').textContent = `p₀ = ${f(p0, 2)} ve p̂ = ${f(ph, 2)}`;
+    $('oz2').textContent = 'SH = ' + f(se, 4);
+    $('oz3e').textContent = `Ret Kararı (α = ${f(alfa1, 2)}):`;
+    let karar, renk;
+    if (p <= alfa1 / 5){ karar = 'Güçlü Kanıt – H₀ Reddedilir'; renk = 'var(--yesil)'; }
+    else if (anlamli){ karar = 'Yeterli Kanıt – H₀ Reddedilir'; renk = 'var(--yesil)'; }
+    else if (p <= 0.10){ karar = 'Zayıf Kanıt – H₀ Reddedilemez'; renk = '#b7791f'; }
+    else { karar = 'Kanıt Yok – H₀ Reddedilemez'; renk = 'var(--kirmizi)'; }
+    $('oz3').textContent = karar; $('oz3').style.color = renk;
+    const ok = n * p0 >= 10 && n * (1 - p0) >= 10;
+    $('kosul').textContent = ok ? `sağlanıyor (np₀ = ${f(n * p0, 0)}, n(1−p₀) = ${f(n * (1 - p0), 0)})` : `SAĞLANMIYOR (np₀ = ${f(n * p0, 0)}, n(1−p₀) = ${f(n * (1 - p0), 0)}) — sonuç güvenilir olmayabilir`;
+    $('kosul').style.color = ok ? 'var(--yesil)' : 'var(--kirmizi)';
+
+    // ---- grafik ----
+    const svg = $('svg1'); svg.innerHTML = '';
+    const W = 760, H = 320, L = 40, R = 40, T = 30, B = 60, ZM = 4.5;
+    const sx = x => L + (x + ZM) / (2 * ZM) * (W - L - R);
+    const ymax = phi(0) * 1.1;
+    const sy = y => H - B - y / ymax * (H - T - B);
+    const yol = (a, b) => { let d = `M${sx(a)},${sy(0)}`; for (let i = 0; i <= 200; i++){ const x = a + (b - a) * i / 200; d += ` L${sx(x)},${sy(phi(x))}`; } return d + ` L${sx(b)},${sy(0)} Z`; };
+    // eksen
+    el('line', {x1: L, x2: W - R, y1: sy(0), y2: sy(0), stroke: '#bbb'}, svg);
+    for (let t = -4; t <= 4; t++){
+      el('line', {x1: sx(t), x2: sx(t), y1: sy(0), y2: sy(0) + 5, stroke: '#bbb'}, svg);
+      el('text', {x: sx(t), y: sy(0) + 19, 'text-anchor': 'middle', 'font-size': 11, 'font-family': 'monospace', fill: '#555'}, svg).textContent = t > 0 ? '+' + t : t;
+    }
+    // red bölgeleri (kritik)
+    const zc = Math.abs(zk);
+    const kritik = yon === 'sol' ? [-zc] : yon === 'sag' ? [zc] : [-zc, zc];
+    // p-değeri alanı
+    const zz = Math.max(-ZM, Math.min(ZM, z)), az = Math.min(ZM, Math.abs(z));
+    const renkA = anlamli ? 'rgba(200,32,46,.38)' : 'rgba(11,74,139,.25)';
+    if (yon === 'sol') el('path', {d: yol(-ZM, zz), fill: renkA}, svg);
+    else if (yon === 'sag') el('path', {d: yol(zz, ZM), fill: renkA}, svg);
+    else { el('path', {d: yol(-ZM, -az), fill: renkA}, svg); el('path', {d: yol(az, ZM), fill: renkA}, svg); }
+    // eğri
+    let d = ''; for (let i = 0; i <= 300; i++){ const x = -ZM + 2 * ZM * i / 300; d += (i ? ' L' : 'M') + sx(x) + ',' + sy(phi(x)); }
+    el('path', {d, fill: 'none', stroke: '#0b4a8b', 'stroke-width': 2.2}, svg);
+    // kritik çizgiler
+    kritik.forEach(k => {
+      el('line', {x1: sx(k), x2: sx(k), y1: T + 30, y2: sy(0), stroke: '#c8202e', 'stroke-width': 1.3, 'stroke-dasharray': '5 4', opacity: .8}, svg);
+      el('text', {x: sx(k), y: T + 22, 'text-anchor': 'middle', 'font-size': 10.5, 'font-family': 'monospace', fill: '#c8202e'}, svg).textContent = 'z* = ' + f(k, 2);
+    });
+    // z işaretçisi
+    const zg = Math.max(-ZM + .05, Math.min(ZM - .05, z));
+    const zs = [zg]; if (yon === 'iki' && Math.abs(z) > .01) zs.push(-zg);
+    zs.forEach((zv, i) => {
+      el('line', {x1: sx(zv), x2: sx(zv), y1: sy(phi(zv)) - 6, y2: sy(0), stroke: '#c8202e', 'stroke-width': 2}, svg);
+      el('circle', {cx: sx(zv), cy: sy(phi(zv)), r: 4.5, fill: '#c8202e'}, svg);
+      const g = el('g', {}, svg);
+      const etiket = i === 0 ? 'z = ' + f(z, 2) : '−|z|';
+      const w = etiket.length * 7.2 + 14;
+      el('rect', {x: sx(zv) - w / 2, y: sy(0) + 27, width: w, height: 20, rx: 3, fill: '#c8202e'}, g);
+      el('text', {x: sx(zv), y: sy(0) + 41, 'text-anchor': 'middle', 'font-size': 11.5, 'font-family': 'monospace', fill: '#fff', 'font-weight': 700}, g).textContent = etiket;
+    });
+    // alan etiketi
+    el('text', {x: W - R, y: T + 4, 'text-anchor': 'end', 'font-size': 12, 'font-family': 'Georgia,serif', fill: anlamli ? '#c8202e' : '#0b4a8b', 'font-weight': 700}, svg).textContent = 'Taralı alan = p-değeri = ' + (p < 0.0001 ? '< 0,0001' : f(p, 4));
+  }
+
+  // ===================== SEKME 2 =====================
+  ['a2', 'p02', 'pt', 'n2'].forEach(id => $(id).addEventListener('input', ciz2));
+
+  function ciz2(){
+    const a = +$('a2').value, p0 = +$('p02').value, p = +$('pt').value, n = +$('n2').value;
+    const se0 = Math.sqrt(p0 * (1 - p0) / n), sea = Math.sqrt(p * (1 - p) / n);
+    const sag = p >= p0; // gerçek oran büyükse sağ kuyruklu, küçükse sol kuyruklu test
+    const zc = invPhi(1 - a);
+    const pk = sag ? p0 + zc * se0 : p0 - zc * se0;
+    const beta = sag ? Phi((pk - p) / sea) : 1 - Phi((pk - p) / sea);
+    const guc = 1 - beta;
+
+    $('aR').textContent = 'α = ' + f(a, 3);
+    $('p02R').textContent = 'p₀ = ' + f(p0, 2);
+    $('ptR').textContent = 'p = ' + f(p, 2);
+    $('n2R').textContent = 'n = ' + n;
+    $('sk1').textContent = yz(a); $('sk1p').textContent = 'p = ' + f(a, 3);
+    $('sk2').textContent = yz(beta); $('sk2p').textContent = 'p = ' + f(beta, 3);
+    $('sk3').textContent = yz(guc); $('sk3p').textContent = 'p = ' + f(guc, 3);
+    $('t1').textContent = yz(a); $('t2').textContent = yz(beta); $('t3').textContent = yz(guc); $('t4').textContent = yz(1 - a);
+    $('kritikMetin').innerHTML = `Kritik Oran Sınırı p<sub>krit</sub> = ${f(pk, 3)} · ${sag ? 'Sağ kuyruklu test (Hₐ: p > p₀)' : 'Sol kuyruklu test (Hₐ: p < p₀)'} · SH₀ = ${f(se0, 4)}, SHₐ = ${f(sea, 4)}`;
+
+    const svg = $('svg2'); svg.innerHTML = '';
+    const W = 760, H = 340, L = 30, R = 30, T = 56, B = 60;
+    const xmin = Math.min(p0 - 4.2 * se0, p - 4.2 * sea), xmax = Math.max(p0 + 4.2 * se0, p + 4.2 * sea);
+    const sx = x => L + (x - xmin) / (xmax - xmin) * (W - L - R);
+    const yo = (x, m, s) => phi((x - m) / s) / s;
+    const ymax = Math.max(yo(p0, p0, se0), yo(p, p, sea)) * 1.08;
+    const sy = y => H - B - y / ymax * (H - T - B);
+    const egri = (m, s, a1, b1, kapali) => {
+      let d = kapali ? `M${sx(a1)},${sy(0)}` : '';
+      for (let i = 0; i <= 240; i++){ const x = a1 + (b1 - a1) * i / 240; d += (i || kapali ? ' L' : 'M') + sx(x) + ',' + sy(yo(x, m, s)); }
+      return kapali ? d + ` L${sx(b1)},${sy(0)} Z` : d;
+    };
+    // eksen + işaretler
+    el('line', {x1: L, x2: W - R, y1: sy(0), y2: sy(0), stroke: '#bbb'}, svg);
+    const adim = (xmax - xmin) > .4 ? .1 : (xmax - xmin) > .15 ? .05 : .02;
+    for (let t = Math.ceil(xmin / adim) * adim; t <= xmax + 1e-9; t += adim){
+      el('line', {x1: sx(t), x2: sx(t), y1: sy(0), y2: sy(0) + 4, stroke: '#bbb'}, svg);
+      el('text', {x: sx(t), y: sy(0) + 17, 'text-anchor': 'middle', 'font-size': 10.5, 'font-family': 'monospace', fill: '#666'}, svg).textContent = f(t, 2);
+    }
+    // dolgu: Hₐ yoğunluğu altındaki alanlar
+    el('path', {d: egri(p, sea, xmin, xmax, true), fill: 'rgba(20,150,111,.10)'}, svg);
+    el('path', {d: egri(p0, se0, xmin, xmax, true), fill: 'rgba(11,74,139,.05)'}, svg);
+    // β (II. tip): Hₐ eğrisi altında, kabul bölgesi
+    if (sag) el('path', {d: egri(p, sea, xmin, pk, true), fill: 'rgba(11,74,139,.35)'}, svg);
+    else el('path', {d: egri(p, sea, pk, xmax, true), fill: 'rgba(11,74,139,.35)'}, svg);
+    // α (I. tip): H₀ eğrisi altında, ret bölgesi
+    if (sag) el('path', {d: egri(p0, se0, pk, xmax, true), fill: 'rgba(200,32,46,.55)'}, svg);
+    else el('path', {d: egri(p0, se0, xmin, pk, true), fill: 'rgba(200,32,46,.55)'}, svg);
+    // eğriler
+    el('path', {d: egri(p0, se0, xmin, xmax, false), fill: 'none', stroke: '#0b4a8b', 'stroke-width': 2}, svg);
+    el('path', {d: egri(p, sea, xmin, xmax, false), fill: 'none', stroke: '#14966f', 'stroke-width': 2}, svg);
+    // merkez çizgileri ve etiketler
+    [[p0, se0, '#0b4a8b', 'H₀: p = ' + f(p0, 2)], [p, sea, '#14966f', 'Hₐ: p = ' + f(p, 2)]].forEach(([m, s, c, t], i) => {
+      el('line', {x1: sx(m), x2: sx(m), y1: sy(yo(m, m, s)), y2: sy(0), stroke: c, 'stroke-dasharray': '3 3', opacity: .6}, svg);
+      const ust = Math.abs(sx(p0) - sx(p)) < 80 && i === 1 ? 16 : 0;
+      el('text', {x: sx(m), y: sy(yo(m, m, s)) - 8 - ust, 'text-anchor': 'middle', 'font-size': 11, 'font-family': 'monospace', 'font-weight': 700, fill: c}, svg).textContent = t;
+    });
+    // kritik sınır
+    el('line', {x1: sx(pk), x2: sx(pk), y1: 6, y2: sy(0) + 26, stroke: '#c8202e', 'stroke-width': 1.6, 'stroke-dasharray': '4 3'}, svg);
+    const et = 'p_krit = ' + f(pk, 3), w = et.length * 7 + 14;
+    el('rect', {x: sx(pk) - w / 2, y: sy(0) + 26, width: w, height: 20, rx: 3, fill: '#c8202e'}, svg);
+    el('text', {x: sx(pk), y: sy(0) + 40, 'text-anchor': 'middle', 'font-size': 11.5, 'font-family': 'monospace', 'font-weight': 700, fill: '#fff'}, svg).textContent = et;
+    // bölge etiketleri
+    const ofs = 70;
+    el('text', {x: sx(pk) + (sag ? -ofs : ofs), y: sy(0) - 6, 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, fill: '#0b4a8b', stroke: '#fff', 'stroke-width': 3, 'paint-order': 'stroke'}, svg).textContent = 'II. Tip Bölge (β)';
+    el('text', {x: sx(pk) + (sag ? ofs : -ofs), y: sy(0) - 6, 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, fill: '#c8202e', stroke: '#fff', 'stroke-width': 3, 'paint-order': 'stroke'}, svg).textContent = 'I. Tip Bölge (α)';
+    el('text', {x: sx(pk) + (sag ? 8 : -8), y: 16, 'text-anchor': sag ? 'start' : 'end', 'font-size': 11, fill: '#c8202e'}, svg).textContent = sag ? 'H₀ RET bölgesi →' : '← H₀ RET bölgesi';
+    el('text', {x: sx(pk) + (sag ? -8 : 8), y: 16, 'text-anchor': sag ? 'end' : 'start', 'font-size': 11, fill: '#555'}, svg).textContent = sag ? '← H₀ reddedilemez' : 'H₀ reddedilemez →';
+  }
+
+  ciz1(); ciz2();
+})();
+</script>
+</body>
+</html>

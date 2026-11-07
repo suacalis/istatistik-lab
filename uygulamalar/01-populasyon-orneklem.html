@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İstatistik Laboratuvarı: Popülasyon ve Örneklem</title>
+<style>
+  :root{
+    --mavi:#0b4a8b; --mavi-koyu:#083766; --kirmizi:#d4202f; --gri:#cfcac2;
+    --zemin:#f3f3f1; --kart:#ffffff; --metin:#1d2433; --soluk:#6b7280; --kenar:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--zemin);color:var(--metin)}
+  header{display:flex;align-items:stretch;justify-content:space-between;padding:0 0 0 24px;min-height:62px;background:#fff;border-bottom:1px solid var(--kenar)}
+  .logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .logo .ikon{width:38px;height:38px;border-radius:8px;background:var(--kirmizi);display:grid;place-items:center}
+  .logo h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:21px;color:var(--mavi)}
+  header .alt{font-size:11px;letter-spacing:.18em;color:var(--soluk);text-transform:uppercase;font-style:italic}
+  .duzen{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 63px)}
+  aside{background:#fff;border-right:1px solid var(--kenar);padding:20px 18px}
+  .baslik-k{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mavi);text-transform:uppercase;margin:0 0 12px}
+  label.e{display:block;font-size:13px;font-weight:600;margin:10px 0 8px}
+  .dag-btn{display:block;width:100%;text-align:left;padding:11px 13px;margin-bottom:8px;border:1px solid var(--kenar);background:#fff;border-radius:7px;font-size:14px;cursor:pointer;color:var(--metin);transition:.15s}
+  .dag-btn:hover{border-color:var(--mavi)}
+  .dag-btn.aktif{background:var(--mavi);color:#fff;border-color:var(--mavi)}
+  input[type=range]{width:100%;accent-color:var(--kirmizi);margin:6px 0 14px}
+  .ana-btn{width:100%;padding:14px;border:0;border-radius:8px;background:var(--kirmizi);color:#fff;font-weight:800;letter-spacing:.06em;font-size:15px;cursor:pointer;text-transform:uppercase}
+  .ana-btn:disabled{opacity:.55;cursor:wait}
+  .ikincil{width:100%;margin-top:8px;padding:10px;border:1px solid var(--mavi);border-radius:8px;background:#fff;color:var(--mavi);font-weight:700;font-size:13px;cursor:pointer}
+  .ikincil:disabled{opacity:.5;cursor:wait}
+  .metrik-kart{margin-top:18px;background:var(--mavi);color:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 6px 16px rgba(11,74,139,.25)}
+  .metrik-kart .baslik-k{color:#a9c4e6}
+  .satir{display:flex;justify-content:space-between;font-size:13px;margin:8px 0}
+  .satir b{font-variant-numeric:tabular-nums}
+  .ayrac{border-top:1px solid rgba(255,255,255,.2);margin:12px 0}
+  .hata{font-family:Georgia,serif;font-style:italic;font-size:32px;font-weight:700;margin-top:4px}
+  .not{margin-top:16px;background:#f7f7f6;border:1px solid var(--kenar);border-radius:10px;padding:12px 14px;font-size:12.5px;font-style:italic;color:#444;line-height:1.5}
+  main{padding:24px;display:grid;gap:20px;grid-template-columns:1fr 280px;align-content:start}
+  .kart{background:var(--kart);border:1px solid var(--kenar);border-radius:22px;padding:22px 26px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .genis{grid-column:1 / -1}
+  .kart h2{margin:0;font-family:Georgia,serif;color:var(--mavi);font-size:22px}
+  .kart .aciklama{font-size:13px;color:var(--soluk);margin-top:4px}
+  .ust{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .lejant{display:flex;gap:16px;font-size:11px;font-weight:700;letter-spacing:.04em}
+  .lejant span{display:flex;align-items:center;gap:6px}
+  .nokta{width:9px;height:9px;border-radius:50%;display:inline-block}
+  svg{width:100%;display:block}
+  .kucuk-baslik{font-size:12px;font-weight:700;letter-spacing:.14em;color:#444;text-transform:uppercase;margin-bottom:10px}
+  .yogunluk{height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-top:6px}
+  .yogunluk div{height:100%;background:var(--kirmizi);width:0;transition:width .4s}
+  .ipucu{font-size:12px;color:var(--soluk);line-height:1.5;margin-top:10px}
+  .bekle{fill:#999;font-style:italic;font-family:Georgia,serif;font-size:14px}
+  @media (max-width:900px){.duzen{grid-template-columns:1fr}main{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--kenar)}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html">
+    <div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div>
+    <h1>İstatistik Laboratuvarı: Popülasyon ve Örneklem</h1>
+  </a>
+  <div style="display:flex;align-items:stretch"><div class="alt" style="display:flex;align-items:center;padding-right:16px">Etkileşimli Simülasyon • Uygulama 01</div><a href="../index.html" style="display:flex;align-items:center;padding:0 18px;border-left:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;text-decoration:none">← Tüm Uygulamalar</a></div>
+</header>
+
+<div class="duzen">
+  <aside>
+    <p class="baslik-k">Popülasyon Ayarları</p>
+    <label class="e">Dağılım Türü</label>
+    <button class="dag-btn aktif" data-dag="normal">Normal Dağılım</button>
+    <button class="dag-btn" data-dag="tekduze">Tekdüze (Uniform) Dağılım</button>
+    <button class="dag-btn" data-dag="carpik">Çarpık (Lognormal)</button>
+
+    <label class="e" for="nKaydir">Örneklem Büyüklüğü n = <span id="nDeger">30</span></label>
+    <input type="range" id="nKaydir" min="1" max="100" value="30">
+
+    <button class="ana-btn" id="cekBtn">Örneklem Çek</button>
+    <button class="ikincil" id="cokluBtn">100 Örneklemi Hızlı Çek</button>
+    <button class="ikincil" id="sifirBtn">Örneklem Ortalamalarını Sıfırla</button>
+
+    <div class="metrik-kart">
+      <p class="baslik-k">Örneklem Göstergeleri</p>
+      <div class="satir"><span>Popülasyon Ortalaması (μ)</span><b id="mu">–</b></div>
+      <div class="satir"><span>Örneklem Ortalaması (x̄)</span><b id="xbar">—</b></div>
+      <div class="satir"><span>Popülasyon Std. Sapması (σ)</span><b id="sigma">–</b></div>
+      <div class="satir"><span>Örneklem Std. Sapması (s)</span><b id="sS">—</b></div>
+      <div class="ayrac"></div>
+      <p class="baslik-k" style="margin-bottom:0;text-transform:none">ÖRNEKLEME HATASI (x̄ − μ)</p>
+      <div class="hata" id="hata">0,00</div>
+    </div>
+
+    <div class="not"><b>Neden x̄ ≠ μ?</b><br>
+      Örnekleme hatası <b>rastlantısallıktan</b> doğar. Her örneklem farklı bireyleri seçer; bu yüzden örneklem ortalaması, popülasyonun gerçek merkezi (μ) etrafında dalgalanır. n büyüdükçe bu dalgalanma küçülür.
+    </div>
+  </aside>
+
+  <main>
+    <section class="kart genis">
+      <div class="ust">
+        <div>
+          <h2>Popülasyon Dağılımı</h2>
+          <div class="aciklama">500 bireysel veri noktası ve frekans biçimi görüntüleniyor</div>
+        </div>
+        <div class="lejant">
+          <span><i class="nokta" style="background:#cfcfcf"></i>POPÜLASYON</span>
+          <span><i class="nokta" style="background:var(--kirmizi)"></i>ÖRNEKLEME SEÇİLEN</span>
+        </div>
+      </div>
+      <svg id="popSvg" viewBox="0 0 900 260" aria-label="Popülasyon dağılımı"></svg>
+    </section>
+
+    <section class="kart">
+      <div class="kucuk-baslik" id="ornBaslik">Örneklem Dağılımı (n=30)</div>
+      <svg id="ornSvg" viewBox="0 0 600 240" aria-label="Örneklem histogramı"></svg>
+    </section>
+
+    <section class="kart">
+      <div class="kucuk-baslik" style="color:var(--mavi)">Örnekleme Bilgileri</div>
+      <div class="satir"><span>Popülasyon N</span><b id="Nd" style="color:var(--mavi);font-family:monospace">500</b></div>
+      <div class="satir"><span>Örneklem n</span><b id="nd" style="color:var(--kirmizi);font-family:monospace">30</b></div>
+      <div class="satir"><span>Çekilen örneklem sayısı</span><b id="kd" style="font-family:monospace">0</b></div>
+      <div class="ayrac" style="border-color:var(--kenar)"></div>
+      <div class="kucuk-baslik" style="color:var(--mavi);margin-bottom:0">Örnekleme Oranı (n / N)</div>
+      <div class="yogunluk"><div id="yogBar"></div></div>
+      <div class="satir"><span style="color:var(--soluk)">Oran</span><b id="yogYuzde">%6,0</b></div>
+      <p class="ipucu">Örneklem, popülasyonun yalnızca küçük bir kısmıdır; yine de iyi seçilmiş rastgele bir örneklem popülasyon hakkında güvenilir çıkarım yapmamızı sağlar.</p>
+    </section>
+
+    <section class="kart genis">
+      <div class="ust">
+        <div>
+          <h2>Örneklem Ortalamalarının Dağılımı</h2>
+          <div class="aciklama">Her çekilişin x̄ değeri burada birikir — örnekleme dağılımı ve standart hata</div>
+        </div>
+        <div class="lejant">
+          <span>Ortalama x̄'lerin ortalaması: <b id="xbarOrt" style="margin-left:4px">—</b></span>
+          <span>Gözlenen SH: <b id="shGoz" style="margin-left:4px">—</b></span>
+          <span>Kuramsal σ/√n: <b id="shKur" style="margin-left:4px">—</b></span>
+        </div>
+      </div>
+      <svg id="ortSvg" viewBox="0 0 900 220" aria-label="Örneklem ortalamaları"></svg>
+      <p class="ipucu">İpucu: n'yi 5'e indirip 100 örneklem çekin, sonra n'yi 80'e çıkarıp tekrarlayın. x̄ değerlerinin μ çevresinde ne kadar daraldığına dikkat edin. Çarpık dağılımda bile x̄'lerin dağılımı n büyüdükçe çan eğrisine yaklaşır (Merkezi Limit Teoremi).</p>
+    </section>
+  </main>
+</div>
+
+<div style="text-align:center;font-size:12px;color:#6b7280;padding:22px 16px 30px">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 01 — <a href="../index.html" style="color:#6b7280">Portala dön</a></div>
+<script>
+(() => {
+  const N = 500, XMIN = 0, XMAX = 110;
+  const fmt = (v, d = 2) => v.toLocaleString('tr-TR', {minimumFractionDigits: d, maximumFractionDigits: d});
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+
+  // Tohumlu rastgele sayı üreteci (popülasyon her dağılım için sabit kalsın)
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+
+  function populasyonUret(tur){
+    const r = mulberry32({normal: 207, tekduze: 2071, carpik: 2072}[tur]);
+    const veri = [];
+    while (veri.length < N){
+      let x;
+      if (tur === 'normal') x = 50 + 12 * gauss(r);
+      else if (tur === 'tekduze') x = 10 + 85 * r();
+      else x = Math.exp(3.45 + 0.45 * gauss(r));
+      if (x >= 2 && x <= 105) veri.push({x, y: r()});
+    }
+    return veri;
+  }
+  const ort = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const sd = (a, orneklem) => {
+    if (a.length < 2) return NaN;
+    const m = ort(a);
+    return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - (orneklem ? 1 : 0)));
+  };
+
+  let tur = 'normal', pop = [], mu = 0, sigma = 0, n = 30, secilen = [], xbarlar = [], calisiyor = false;
+
+  // ---------- Popülasyon grafiği ----------
+  const popSvg = $('popSvg');
+  const PW = 900, PH = 260, PL = 50, PR = 30, PT = 34, PB = 52;
+  const sx = x => PL + (x - XMIN) / (XMAX - XMIN) * (PW - PL - PR);
+  let noktalar = [];
+
+  function popCiz(){
+    popSvg.innerHTML = '';
+    // dikey yığılma: yoğunluğa göre jitter genişliği
+    const kutu = new Array(56).fill(0);
+    pop.forEach(p => kutu[Math.min(55, Math.floor(p.x / 2))]++);
+    const maks = Math.max(...kutu);
+    const orta = PT + (PH - PT - PB) / 2, yar = (PH - PT - PB) / 2;
+    noktalar = pop.map(p => {
+      const yog = kutu[Math.min(55, Math.floor(p.x / 2))] / maks;
+      const y = orta + (p.y - 0.5) * 2 * yar * (0.25 + 0.75 * yog);
+      return el('circle', {cx: sx(p.x), cy: y, r: 4.5, fill: '#cfcfcf', 'fill-opacity': .55}, popSvg);
+    });
+    // eksen
+    [0, 25, 50, 75, 100].forEach(t => {
+      el('text', {x: sx(t), y: PH - 6, 'text-anchor': 'middle', 'font-size': 12, fill: '#444'}, popSvg).textContent = t;
+    });
+    el('text', {x: PW - PR, y: PH - 6, 'text-anchor': 'end', 'font-size': 11, fill: '#888'}, popSvg).textContent = 'Değer (X)';
+    // μ çizgisi
+    el('line', {x1: sx(mu), x2: sx(mu), y1: PT - 6, y2: PH - PB + 6, stroke: '#0b4a8b', 'stroke-width': 1.6, 'stroke-dasharray': '4 4'}, popSvg);
+    el('text', {x: sx(mu), y: PT - 12, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: '#0b4a8b', 'font-family': 'Georgia,serif'}, popSvg).textContent = 'μ = ' + fmt(mu, 1);
+    // x̄ çizgisi (varsa)
+    popSvg.xbarCizgi = el('line', {x1: 0, x2: 0, y1: PT - 6, y2: PH - PB + 6, stroke: '#d4202f', 'stroke-width': 1.6, 'stroke-dasharray': '2 3', visibility: 'hidden'}, popSvg);
+    popSvg.xbarYazi = el('text', {x: 0, y: PH - PB + 18, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#d4202f', 'font-family': 'Georgia,serif', visibility: 'hidden'}, popSvg);
+  }
+  function xbarGoster(x){
+    const v = x == null ? 'hidden' : 'visible';
+    popSvg.xbarCizgi.setAttribute('visibility', v);
+    popSvg.xbarYazi.setAttribute('visibility', v);
+    if (x == null) return;
+    popSvg.xbarCizgi.setAttribute('x1', sx(x)); popSvg.xbarCizgi.setAttribute('x2', sx(x));
+    popSvg.xbarYazi.setAttribute('x', sx(x)); popSvg.xbarYazi.textContent = 'x̄ = ' + fmt(x, 1);
+  }
+  function vurguTemizle(){
+    noktalar.forEach(c => { c.setAttribute('fill', '#cfcfcf'); c.setAttribute('fill-opacity', .55); c.setAttribute('r', 4.5); });
+  }
+  function vurgula(i){
+    const c = noktalar[i];
+    c.setAttribute('fill', '#d4202f'); c.setAttribute('fill-opacity', 1); c.setAttribute('r', 5.5);
+    popSvg.appendChild(c); // öne getir
+  }
+
+  // ---------- Örneklem histogramı ----------
+  const ornSvg = $('ornSvg');
+  function ornCiz(degerler){
+    ornSvg.innerHTML = '';
+    const W = 600, H = 240, L = 20, R = 20, T = 20, B = 40;
+    if (!degerler.length){
+      el('rect', {x: 120, y: 30, width: 360, height: 160, fill: 'none', stroke: '#e5e7eb', 'stroke-dasharray': '4 4', rx: 10}, ornSvg);
+      el('text', {x: 300, y: 115, 'text-anchor': 'middle', class: 'bekle'}, ornSvg).textContent = 'Örneklem bekleniyor...';
+      return;
+    }
+    const mn = Math.min(...degerler), mx = Math.max(...degerler);
+    const k = Math.max(4, Math.min(12, Math.ceil(Math.sqrt(degerler.length)) + 2));
+    const gen = (mx - mn) / k || 1;
+    const kutu = new Array(k).fill(0);
+    degerler.forEach(v => kutu[Math.min(k - 1, Math.floor((v - mn) / gen))]++);
+    const ym = Math.max(...kutu);
+    const bw = (W - L - R) / k;
+    const m = ort(degerler);
+    kutu.forEach((c, i) => {
+      const h = c / ym * (H - T - B);
+      const icinde = m >= mn + i * gen && m < mn + (i + 1) * gen;
+      el('rect', {x: L + i * bw + 3, y: H - B - h, width: bw - 6, height: h, fill: icinde ? '#b9b0a3' : '#ddd8cf', rx: 2}, ornSvg);
+      if (c) el('text', {x: L + i * bw + bw - 10, y: H - B - h - 4, 'text-anchor': 'middle', 'font-size': 10, fill: '#777'}, ornSvg).textContent = c;
+      el('text', {x: L + i * bw + bw / 2, y: H - B + 15, 'text-anchor': 'middle', 'font-size': 10, fill: '#666'}, ornSvg).textContent = fmt(mn + (i + .5) * gen, 1);
+    });
+    const xm = L + (m - mn) / (mx - mn || 1) * (W - L - R);
+    el('line', {x1: xm, x2: xm, y1: T - 6, y2: H - B, stroke: '#d4202f', 'stroke-width': 2}, ornSvg);
+    el('text', {x: xm, y: H - 6, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: '#d4202f', 'font-family': 'Georgia,serif'}, ornSvg).textContent = 'x̄ = ' + fmt(m, 1);
+  }
+
+  // ---------- Örneklem ortalamaları grafiği ----------
+  const ortSvg = $('ortSvg');
+  function ortCiz(){
+    ortSvg.innerHTML = '';
+    const W = 900, H = 220, L = 50, R = 30, T = 16, B = 34;
+    const s2 = x => L + (x - XMIN) / (XMAX - XMIN) * (W - L - R);
+    [0, 25, 50, 75, 100].forEach(t => {
+      el('line', {x1: s2(t), x2: s2(t), y1: T, y2: H - B, stroke: '#f0f0f0'}, ortSvg);
+      el('text', {x: s2(t), y: H - 12, 'text-anchor': 'middle', 'font-size': 12, fill: '#444'}, ortSvg).textContent = t;
+    });
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: '#ccc'}, ortSvg);
+    el('line', {x1: s2(mu), x2: s2(mu), y1: T, y2: H - B, stroke: '#0b4a8b', 'stroke-width': 1.6, 'stroke-dasharray': '4 4'}, ortSvg);
+    el('text', {x: s2(mu) + 6, y: T + 12, 'font-size': 12, 'font-weight': 700, fill: '#0b4a8b', 'font-family': 'Georgia,serif'}, ortSvg).textContent = 'μ';
+    if (!xbarlar.length){
+      el('text', {x: W / 2, y: H / 2, 'text-anchor': 'middle', class: 'bekle'}, ortSvg).textContent = 'Henüz örneklem çekilmedi';
+      $('xbarOrt').textContent = '—'; $('shGoz').textContent = '—';
+      return;
+    }
+    // 1 birimlik kutularda nokta yığını
+    const yig = {};
+    const r = 4, adim = 2 * r + 1;
+    const maksYigin = Math.floor((H - B - T) / adim);
+    xbarlar.forEach((v, i) => {
+      const k = Math.round(v);
+      yig[k] = (yig[k] || 0) + 1;
+      const seviye = yig[k] - 1;
+      if (seviye < maksYigin)
+        el('circle', {cx: s2(k), cy: H - B - r - 1 - seviye * adim, r, fill: i === xbarlar.length - 1 ? '#d4202f' : '#0b4a8b', 'fill-opacity': i === xbarlar.length - 1 ? 1 : .55}, ortSvg);
+    });
+    $('xbarOrt').textContent = fmt(ort(xbarlar));
+    $('shGoz').textContent = xbarlar.length > 1 ? fmt(sd(xbarlar, true)) : '—';
+  }
+
+  // ---------- Göstergeler ----------
+  function gostergeGuncelle(){
+    $('mu').textContent = fmt(mu);
+    $('sigma').textContent = fmt(sigma);
+    $('nDeger').textContent = n; $('nd').textContent = n;
+    $('ornBaslik').textContent = `Örneklem Dağılımı (n=${n})`;
+    $('yogBar').style.width = (n / N * 100) + '%';
+    $('yogYuzde').textContent = '%' + fmt(n / N * 100, 1);
+    // sonlu popülasyon düzeltmeli kuramsal standart hata
+    const fpc = Math.sqrt((N - n) / (N - 1));
+    $('shKur').textContent = fmt(sigma / Math.sqrt(n) * fpc);
+    $('kd').textContent = xbarlar.length;
+  }
+  function sonucYaz(degerler){
+    if (!degerler.length){
+      $('xbar').textContent = '—'; $('sS').textContent = '—'; $('hata').textContent = fmt(0);
+      xbarGoster(null); return;
+    }
+    const m = ort(degerler);
+    $('xbar').textContent = fmt(m);
+    const s = sd(degerler, true);
+    $('sS').textContent = isNaN(s) ? '—' : fmt(s);
+    const h = m - mu;
+    $('hata').textContent = (h > 0 ? '+' : '') + fmt(h);
+    xbarGoster(m);
+  }
+
+  function rastgeleIndeksler(k){
+    const idx = Array.from({length: N}, (_, i) => i);
+    for (let i = 0; i < k; i++){
+      const j = i + Math.floor(Math.random() * (N - i));
+      [idx[i], idx[j]] = [idx[j], idx[i]];
+    }
+    return idx.slice(0, k);
+  }
+
+  function kilit(b){
+    calisiyor = b;
+    $('cekBtn').disabled = b; $('cokluBtn').disabled = b; $('sifirBtn').disabled = b;
+    $('cekBtn').textContent = b ? 'Örneklem çekiliyor…' : 'Örneklem Çek';
+  }
+
+  async function orneklemCek(){
+    if (calisiyor) return;
+    kilit(true);
+    vurguTemizle(); xbarGoster(null);
+    secilen = rastgeleIndeksler(n);
+    const gecikme = Math.max(8, Math.min(60, 1200 / n));
+    const degerler = [];
+    for (const i of secilen){
+      vurgula(i); degerler.push(pop[i].x);
+      sonucYaz(degerler); ornCiz(degerler);
+      await new Promise(r => setTimeout(r, gecikme));
+    }
+    xbarlar.push(ort(degerler));
+    ortCiz(); gostergeGuncelle();
+    kilit(false);
+  }
+
+  async function cokluCek(){
+    if (calisiyor) return;
+    kilit(true);
+    $('cokluBtn').textContent = 'Çekiliyor…';
+    for (let t = 0; t < 100; t++){
+      secilen = rastgeleIndeksler(n);
+      const degerler = secilen.map(i => pop[i].x);
+      xbarlar.push(ort(degerler));
+      if (t % 5 === 4 || t === 99){
+        vurguTemizle(); secilen.forEach(vurgula);
+        sonucYaz(degerler); ornCiz(degerler); ortCiz(); gostergeGuncelle();
+        await new Promise(r => setTimeout(r, 30));
+      }
+    }
+    $('cokluBtn').textContent = '100 Örneklemi Hızlı Çek';
+    kilit(false);
+  }
+
+  function sifirla(){
+    xbarlar = []; secilen = [];
+    vurguTemizle(); sonucYaz([]); ornCiz([]); ortCiz(); gostergeGuncelle();
+  }
+
+  function dagilimKur(t){
+    tur = t;
+    pop = populasyonUret(t);
+    const xs = pop.map(p => p.x);
+    mu = ort(xs); sigma = sd(xs, false);
+    popCiz(); sifirla();
+  }
+
+  // ---------- Olaylar ----------
+  document.querySelectorAll('.dag-btn').forEach(b => b.addEventListener('click', () => {
+    if (calisiyor) return;
+    document.querySelectorAll('.dag-btn').forEach(x => x.classList.remove('aktif'));
+    b.classList.add('aktif');
+    dagilimKur(b.dataset.dag);
+  }));
+  $('nKaydir').addEventListener('input', e => {
+    n = +e.target.value;
+    gostergeGuncelle();
+  });
+  $('nKaydir').addEventListener('change', () => { if (!calisiyor) sifirla(); });
+  $('cekBtn').addEventListener('click', orneklemCek);
+  $('cokluBtn').addEventListener('click', cokluCek);
+  $('sifirBtn').addEventListener('click', () => { if (!calisiyor) sifirla(); });
+
+  dagilimKur('normal');
+})();
+</script>
+</body>
+</html>

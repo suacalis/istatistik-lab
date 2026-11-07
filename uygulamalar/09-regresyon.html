@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regresyon ve Eğri Uydurma · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .adim h3{display:flex;align-items:center;gap:8px;font-size:16px}
+  .model-kart{border:1px solid var(--kenar);border-radius:12px;padding:14px 16px}
+  .model-kart.dog{background:#eef4fb;border-color:#c9d8ee}
+  .model-kart.kad{background:#fdf2f3;border-color:#f5c4c9}
+  .model-kart .denk{font-family:var(--mono);font-size:17px;font-weight:800;margin:6px 0}
+  .model-kart.dog .denk{color:var(--mavi)} .model-kart.kad .denk{color:var(--kirmizi)}
+  .model-kart .k{font-size:12.5px;margin:3px 0}
+  .uyari-k{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5}
+  .ana{display:grid;grid-template-columns:330px 1fr;gap:22px;align-items:start}
+  @media (max-width:980px){.ana{grid-template-columns:1fr}}
+  .ipucu-alan{display:none}
+  .ipucu-alan.acik-d{display:grid}
+  .tanil h4{margin:0 0 4px;font-size:12px;letter-spacing:.08em;color:var(--mavi)}
+  .tanil p{margin:0 0 6px;font-size:12.5px;line-height:1.5}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Regresyon ve Eğri Uydurma Gezgini</h1></a>
+  <div class="sag-ust"><a class="geri" href="../index.html">← Tüm Uygulamalar</a></div>
+</header>
+
+<main class="icerik">
+  <div class="ana">
+    <aside class="yigin">
+      <section class="kart adim">
+        <div class="bas"><h3>📄 1. Adım: Veri Seti Seçin</h3><button class="btn" id="hamBtn" style="padding:4px 8px;font-size:11.5px">+ Ham CSV</button></div>
+        <p class="kb" style="margin-top:8px">Ders Kitabı Veri Setleri</p>
+        <select id="vSec"><option value="araba">Otomobil Performansı: MPG ve Beygir Gücü</option><option value="beyzbol">Beyzbol Atıcıları: İnning ve ERA</option><option value="calisma">Çalışma Laboratuvarı: Sınav Puanı ve Çalışma Saati</option><option value="ozel" disabled>Kendi veriniz</option></select>
+        <div class="acik" id="vAcik" style="border-left:3px solid var(--mavi);padding-left:10px;font-style:italic"></div>
+        <div id="hamAlan" class="gizli">
+          <textarea id="hamMetin" placeholder="x,y&#10;1,2&#10;2,4.1&#10;..."></textarea>
+          <div class="btn-grup" style="margin-top:6px"><button class="btn birincil" id="hamYukle">Yapıştırılanı yükle</button><button class="btn" id="dosyaBtn">Dosya seç…</button></div>
+          <input type="file" id="dosya" accept=".csv,.txt,.xlsx,.xls" hidden>
+        </div>
+      </section>
+      <section class="kart adim">
+        <h3>🔁 2. Adım: Sayısal Değişkenleri Seçin</h3>
+        <div class="izgara-2" style="gap:10px">
+          <label><span class="kb" style="font-size:10.5px">X (bağımsız)</span><select id="xSec"></select></label>
+          <label><span class="kb" style="font-size:10.5px">Y (bağımlı)</span><select id="ySec"></select></label>
+        </div>
+        <div class="uyari-k" style="margin-top:10px"><b>FİLTRE ETKİN:</b> Nitel tanımlayıcı sütunlar (harf, model adı vb.) çıkarılmıştır. Açılır listeler yalnızca sayısal sütunları içerir.</div>
+      </section>
+      <section class="kart adim">
+        <h3>📈 3. Adım: Regresyon Modellerini Uydurun</h3>
+        <label class="onay"><input type="checkbox" id="mDog" checked><span><b>Doğrusal model (EKK)</b><br><span class="ipucu-k">ŷ = b₀ + b₁x</span></span></label>
+        <label class="onay"><input type="checkbox" id="mKad"><span><b>İkinci dereceden (parabolik) model</b><br><span class="ipucu-k">ŷ = b₀ + b₁x + b₂x²</span></span></label>
+        <div class="ayrac"></div>
+        <p class="kb">🔮 Tahmin Aracı</p>
+        <div class="bas"><span style="font-size:13px">x =</span><input type="number" id="tahX" style="width:120px"></div>
+        <div class="hesap" style="margin-top:8px" id="tahSonuc"></div>
+      </section>
+      <section class="kart">
+        <div class="bas"><p class="kb" style="margin:0">Gözlemler (<span id="satirSay"></span>)</p><span class="rozet r-gri">TABLO</span></div>
+        <div class="kaydir" style="margin-top:8px"><table class="veri" id="tablo"></table></div>
+      </section>
+    </aside>
+
+    <div class="yigin">
+      <section class="kart">
+        <div class="grafik-ust"><div><h2>● Saçılım Grafiği ve Regresyonlar</h2><div class="acik" id="degBilgi"></div></div><div class="lejant" id="lejant"></div></div>
+        <div class="tuval" id="tuval"><button class="buyut" data-tuval="tuval"></button><svg id="svg" viewBox="0 0 900 470"></svg></div>
+        <div class="izgara-2" style="margin-top:14px">
+          <div class="model-kart dog"><p class="kb" style="font-size:11px">● EKK ile Uydurulan Denklem (Doğrusal)</p><div class="denk" id="dDenk"></div><div class="k" id="dR2"></div><div class="k" id="dR"></div><div class="k ipucu-k">Sıradan en küçük kareler (EKK) yöntemiyle hesaplandı.</div></div>
+          <div class="model-kart kad"><p class="kb" style="font-size:11px;color:var(--kirmizi)">● Uydurulan Eğri Denklemi (İkinci Derece)</p><div class="denk" id="kDenk"></div><div class="k" id="kR2"></div><div class="k" id="kR"></div><div class="k ipucu-k">3×3 normal denklem sistemi Cramer kuralıyla çözüldü.</div></div>
+        </div>
+      </section>
+      <section class="kart">
+        <div class="grafik-ust"><div><h2>Model Tanılama ve Varsayım Doğrulama</h2><div class="acik">Artıkların varyansını, hata yayılımını ve normal dağılım davranışını inceleyin.</div></div>
+          <div class="btn-grup" id="artSec" style="flex:0 0 auto"><button class="btn aktif" data-a="dog">Doğrusal artıklar</button><button class="btn" data-a="kad">İkinci derece artıklar</button></div></div>
+        <div class="izgara-2">
+          <div><p class="kb">Artık Grafiği (y − ŷ ile tahmin ŷ)</p><div class="tuval"><svg id="svgA" viewBox="0 0 440 330"></svg></div></div>
+          <div><p class="kb">Normal Q-Q Grafiği (artık dağılımı)</p><div class="tuval"><svg id="svgQ" viewBox="0 0 440 330"></svg></div></div>
+        </div>
+        <button class="btn tam" id="ipucuBtn" style="margin-top:12px">Grafikleri yorumlamak için yardım mı lazım? İpuçları için tıklayın ▾</button>
+        <div class="ipucu-alan izgara-3 tanil" id="ipucuAlan" style="margin-top:12px">
+          <div class="not"><h4>DOĞRUSALLIK TANISI</h4><p>Doğrusallık varsayımı sağlanıyorsa artıklar sıfır çizgisinin (e = 0) altında ve üstünde rastgele ve simetrik dağılır.</p><p>💡 Belirgin bir eğri örüntü (kubbe ya da çanak) doğrusal olmayan bir ilişkiye işaret eder; ikinci dereceden bir eğri veriye çok daha iyi uyar.</p></div>
+          <div class="not"><h4>EŞVARYANSLILIK TANISI</h4><p>Dikey yayılımın tahmin değerleri boyunca soldan sağa sabit kalıp kalmadığını kontrol edin.</p><p>💡 Huni biçimi (bir tarafta dar, diğerinde geniş) değişen varyansa (heteroskedastisite) işaret eder; ağırlıklı uydurma ya da dönüşüm gerekebilir.</p></div>
+          <div class="not"><h4>NORMALLİK VARSAYIMI (Q-Q)</h4><p>Normal Q-Q grafiği sıralı artıkları kuramsal standart normal kantillerle eşleştirir.</p><p>💡 Noktalar kırmızı köşegen çizgiyi izliyorsa normallik koşulu sağlanır. Belirgin S eğrileri ya da kuyruklarda sapmalar çarpıklık veya aykırı değer gösterir.</p></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 09 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+const VERI = {"araba": {"ad": "Otomobil Performansı: MPG ve Beygir Gücü", "acik": "25 otomobil modelinin verisi. Bu klasik veri seti belirgin bir doğrusal olmayan eğri gösterir. Doğrusal bir model uydurmak Artık Grafiği'nde eğri bir örüntü bırakır; bu durum doğrusallık varsayımının ihlalini çok iyi gösterir ve ikinci dereceden (kuadratik) modeli haklı çıkarır.", "anahtar": "Model", "kolonlar": ["Beygir gücü", "Ağırlık (lb)", "Hızlanma 0–60 (sn)", "MPG (mil/galon)"], "x": "Beygir gücü", "y": "MPG (mil/galon)", "satir": [["Honda Civic", 76, 2011, 14.5, 36], ["Toyota Corolla", 88, 2155, 13.9, 32], ["Mazda 3", 148, 2840, 9.0, 25], ["Volkswagen Golf", 115, 2600, 10.2, 28], ["Ford Mustang Eco", 310, 3532, 5.1, 21], ["Chevrolet Camaro V6", 335, 3435, 5.2, 19], ["Dodge Challenger V8", 485, 4232, 4.2, 15], ["Subaru Impreza", 152, 3100, 9.4, 27], ["BMW 3 Series", 255, 3582, 5.6, 26], ["Porsche 911 Carrera", 379, 3354, 4.0, 18], ["Jeep Wrangler V6", 285, 4200, 7.2, 17], ["Tesla Model 3 Dual", 450, 4072, 3.5, 29], ["Ford F-150", 395, 4700, 6.5, 16], ["Toyota Prius", 121, 3045, 10.5, 45], ["Hyundai Elantra", 147, 2800, 8.5, 33], ["Audi A4", 261, 3627, 5.3, 25], ["Chevrolet Corvette C8", 495, 3647, 2.9, 15], ["Nissan Versa", 122, 2600, 9.8, 35], ["GMC Sierra 1500", 355, 4900, 6.8, 16], ["Lexus RX 350", 295, 4300, 7.7, 20], ["Mazda MX-5 Miata", 181, 2400, 5.7, 29], ["Kia Soul", 147, 2850, 8.8, 29], ["Subaru WRX", 271, 3300, 5.5, 22], ["Dodge Charger", 292, 4100, 6.2, 19], ["Honda Accord", 192, 3150, 7.2, 30]]}, "beyzbol": {"ad": "Beyzbol Atıcıları: Atılan İnning ve ERA", "acik": "22 başlangıç atıcısı için atılan inning (IP) sayısına karşı kazanılmış koşu ortalaması (ERA) ve WHIP. Bu veri seti, atıcı verimliliğinin sezon boyunca iş yükü ya da yorgunlukla ilişkili olup olmadığını incelemeye yardımcı olur.", "anahtar": "Atıcı", "kolonlar": ["Atılan inning (IP)", "Strikeout", "Kazanılmış koşu", "ERA", "WHIP", "Galibiyet"], "x": "Atılan inning (IP)", "y": "ERA", "satir": [["Justin Verlander", 175, 185, 48, 2.5, 0.8, 18], ["Sandy Alcantara", 228, 207, 58, 2.3, 1.0, 14], ["Gerrit Cole", 200, 257, 78, 3.5, 1.0, 13], ["Max Scherzer", 145, 173, 37, 2.3, 0.9, 11], ["Aaron Nola", 205, 235, 74, 3.3, 1.0, 11], ["Corbin Burnes", 193, 243, 63, 2.9, 1.0, 12], ["Shohei Ohtani", 166, 219, 43, 2.3, 1.0, 15], ["Dylan Cease", 184, 227, 45, 2.2, 1.1, 14], ["Carlos Rodon", 178, 237, 57, 2.9, 1.0, 14], ["Julio Urias", 175, 166, 42, 2.2, 1.0, 17], ["Shane Bieber", 200, 198, 64, 2.9, 1.0, 13], ["Zac Gallen", 184, 192, 52, 2.5, 0.9, 12], ["Yu Darvish", 194, 197, 67, 3.1, 0.9, 16], ["Framber Valdez", 201, 194, 63, 2.8, 1.2, 17], ["Miles Mikolas", 202, 153, 74, 3.3, 1.0, 12], ["Logan Webb", 192, 163, 62, 2.9, 1.2, 15], ["Robbie Ray", 189, 212, 78, 3.7, 1.2, 12], ["Jose Berrios", 172, 149, 100, 5.2, 1.4, 12], ["Patrick Corbin", 152, 128, 107, 6.3, 1.7, 6], ["Yusei Kikuchi", 100, 124, 58, 5.2, 1.5, 6], ["Corey Kluber", 164, 139, 80, 4.4, 1.2, 10], ["Madison Bumgarner", 158, 112, 86, 4.9, 1.4, 7]]}, "calisma": {"ad": "Çalışma Laboratuvarı: Sınav Puanı ve Çalışma Saati", "acik": "20 öğrencilik bir grupta haftalık beyan edilen çalışma saati, derse devam oranı, sınav kaygısı (1–10) ve final sınavı puanı. Normal dağılan artıklarla güçlü, klasik bir pozitif doğrusal regresyon örneğidir.", "anahtar": "Öğrenci", "kolonlar": ["Haftalık çalışma saati", "Devam oranı (%)", "Sınav kaygısı (1–10)", "Sınav puanı"], "x": "Haftalık çalışma saati", "y": "Sınav puanı", "satir": [["Ada", 4.5, 80, 8, 58], ["Barış", 6.0, 85, 7, 65], ["Cem", 8.5, 90, 5, 74], ["Deniz", 12.0, 95, 3, 88], ["Ece", 15.0, 98, 2, 94], ["Furkan", 3.0, 75, 9, 50], ["Gizem", 9.5, 92, 4, 81], ["Hakan", 11.0, 89, 6, 84], ["İrem", 7.0, 88, 5, 70], ["Kaan", 5.0, 82, 7, 61], ["Leyla", 13.5, 96, 3, 92], ["Mert", 16.0, 99, 1, 98], ["Nehir", 2.0, 60, 10, 42], ["Onur", 8.0, 84, 6, 73], ["Pelin", 10.0, 91, 4, 79], ["Rüzgar", 14.0, 94, 3, 90], ["Selin", 6.5, 83, 6, 69], ["Tolga", 11.5, 93, 5, 86], ["Umut", 4.0, 78, 8, 54], ["Yasemin", 7.5, 86, 6, 72]]}};
+
+(() => {
+  const {$, el, f} = I;
+  let ds = null, X = null, Y = null, artMod = 'dog';
+  function veriAyarla(anahtar) {
+    const v = VERI[anahtar];
+    ds = {anahtar: v.anahtar, kolonlar: v.kolonlar, satir: v.satir.map(r => { const o = {_ad: r[0]}; v.kolonlar.forEach((k, i) => o[k] = r[i + 1]); return o; }), x: v.x, y: v.y, acik: v.acik};
+    hazirla();
+  }
+  function hazirla() {
+    $('vAcik').textContent = ds.acik;
+    const ops = ds.kolonlar.map(k => `<option>${k}</option>`).join(''); $('xSec').innerHTML = ops; $('ySec').innerHTML = ops;
+    X = ds.x; Y = ds.y; $('xSec').value = X; $('ySec').value = Y; ciz();
+  }
+  function kadratik(x, y) { // normal denklemler + Cramer kuralı
+    const n = x.length, S = k => x.reduce((t, v) => t + v ** k, 0), Sy = k => x.reduce((t, v, i) => t + v ** k * y[i], 0);
+    const A = [[n, S(1), S(2)], [S(1), S(2), S(3)], [S(2), S(3), S(4)]], b = [Sy(0), Sy(1), Sy(2)];
+    const det = m => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+    const D = det(A); if (Math.abs(D) < 1e-12) return null;
+    return [0, 1, 2].map(j => det(A.map((r, i) => r.map((v, k) => k === j ? b[i] : v))) / D);
+  }
+  const R2 = (y, yh) => { const m = I.ort(y); const sst = y.reduce((t, v) => t + (v - m) ** 2, 0), sse = y.reduce((t, v, i) => t + (v - yh[i]) ** 2, 0); return 1 - sse / sst; };
+  const ks = v => { const a = Math.abs(v); return f(v, a > 0 && a < .01 ? Math.min(9, 3 - Math.floor(Math.log10(a))) : 4); };
+  const isr = v => v < 0 ? ' − ' + ks(Math.abs(v)) : ' + ' + ks(v);
+  function modeller() {
+    const p = ds.satir.filter(r => isFinite(r[X]) && isFinite(r[Y]) && r[X] != null && r[Y] != null);
+    const x = p.map(r => r[X]), y = p.map(r => r[Y]);
+    const d = I.dogrusal(x, y), q = kadratik(x, y);
+    return {p, x, y, d, q, fd: v => d.b0 + d.b1 * v, fq: q ? v => q[0] + q[1] * v + q[2] * v * v : null, r: I.korelasyon(x, y)};
+  }
+  function ciz() {
+    const M = modeller(); const {p, x, y} = M; const dog = $('mDog').checked, kad = $('mKad').checked && M.fq;
+    $('degBilgi').innerHTML = `Değişkenler: y = <b>${Y}</b>, x = <b>${X}</b>`;
+    $('satirSay').textContent = p.length;
+    $('tablo').innerHTML = `<thead><tr><th>${ds.anahtar}</th><th>${X}</th><th>${Y}</th>${dog ? '<th>Artık (doğ.)</th>' : ''}</tr></thead><tbody>` + p.map(r => `<tr><td>${r._ad}</td><td>${f(r[X], 1)}</td><td>${f(r[Y], 1)}</td>${dog ? `<td>${f(r[Y] - M.fd(r[X]), 2)}</td>` : ''}</tr>`).join('') + '</tbody>';
+    const svg = $('svg'); svg.innerHTML = ''; const W = 900, H = 470, L = 70, R = 24, T = 20, B = 56;
+    if (p.length < 3) { el('text', {x: W / 2, y: H / 2, 'text-anchor': 'middle', fill: '#999'}, svg, 'İstatistiksel noktaları göstermek için değişken seçin.'); return; }
+    const xt = I.tiklerKapsa(Math.min(...x), Math.max(...x), 8), yt = I.tiklerKapsa(Math.min(...y), Math.max(...y), 6);
+    const sx = I.olcek(xt[0], xt[xt.length - 1], L, W - R), sy = I.olcek(yt[0], yt[yt.length - 1], H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x: sx, y: sy, xt, yt, xEt: X, yEt: Y});
+    const kirp = el('clipPath', {id: 'kirp'}, svg); el('rect', {x: L, y: T, width: W - L - R, height: H - T - B}, kirp);
+    const egri = (fn, renk, kesik) => { let d = ''; for (let i = 0; i <= 200; i++) { const v = xt[0] + (xt[xt.length - 1] - xt[0]) * i / 200; d += (i ? ' L' : 'M') + sx(v) + ',' + sy(fn(v)); }
+      el('path', {d, fill: 'none', stroke: renk, 'stroke-width': 2.6, 'stroke-dasharray': kesik ? '7 5' : null, 'clip-path': 'url(#kirp)'}, svg); };
+    if (dog) egri(M.fd, '#0b4a8b');
+    if (kad) egri(M.fq, '#c8202e', true);
+    p.forEach(r => { const c = el('circle', {cx: sx(r[X]), cy: sy(r[Y]), r: 6, fill: '#1d2433', 'fill-opacity': .7, stroke: '#fff'}, svg); el('title', {}, c, `${r._ad}\n${X}: ${r[X]}\n${Y}: ${r[Y]}`); });
+    $('lejant').innerHTML = (dog ? '<span><i class="cizgi" style="background:#0b4a8b"></i>Doğrusal</span>' : '') + (kad ? '<span><i class="cizgi" style="background:#c8202e"></i>İkinci derece</span>' : '') + '<span><i style="background:#1d2433"></i>Gözlem</span>';
+    // denklem kartları
+    $('dDenk').textContent = dog ? `ŷ = ${f(M.d.b0, 4)}${isr(M.d.b1)}x` : 'ŷ = [Denklem kapalı]';
+    $('dR2').innerHTML = dog ? `Belirleme katsayısı <b>R² = ${f(R2(y, x.map(M.fd)), 4)}</b>` : 'R² = —';
+    $('dR').innerHTML = `<b style="color:var(--mavi)">Korelasyon katsayısı (r) = ${f(M.r, 4)}</b>`;
+    $('kDenk').textContent = kad ? `ŷ = ${f(M.q[0], 4)}${isr(M.q[1])}x${isr(M.q[2])}x²` : 'ŷ = [Denklem kapalı]';
+    $('kR2').innerHTML = kad ? `Belirleme katsayısı <b>R² = ${f(R2(y, x.map(M.fq)), 4)}</b>` : 'R² = —';
+    $('kR').innerHTML = `<b style="color:var(--kirmizi)">Korelasyon katsayısı (r) = ${f(M.r, 4)}</b>`;
+    tahmin(M); artiklar(M);
+  }
+  function tahmin(M) { const v = $('tahX').value;
+    if (v === '') { $('tahSonuc').innerHTML = '<span class="ipucu-k">Bir x değeri girin.</span>'; return; }
+    const x0 = +v, mn = Math.min(...M.x), mx = Math.max(...M.x);
+    $('tahSonuc').innerHTML = `<div class="satir"><span>Doğrusal ŷ:</span><b>${f(M.fd(x0), 3)}</b></div>` + (M.fq ? `<div class="satir"><span>İkinci derece ŷ:</span><b style="color:var(--kirmizi)">${f(M.fq(x0), 3)}</b></div>` : '') +
+      (x0 < mn || x0 > mx ? `<div style="color:var(--kirmizi);font-family:inherit;font-size:11.5px;margin-top:4px">⚠ Dışdeğerleme (ekstrapolasyon): x, gözlenen aralığın [${f(mn, 1)}; ${f(mx, 1)}] dışında. Tahmin güvenilir olmayabilir!</div>` : ''); }
+  function artiklar(M) {
+    const kad = artMod === 'kad' && M.fq; const fn = kad ? M.fq : M.fd; const renk = kad ? '#c8202e' : '#0b4a8b';
+    const yh = M.x.map(fn), e = M.y.map((v, i) => v - yh[i]);
+    const W = 440, H = 330, L = 54, R = 14, T = 14, B = 44;
+    let svg = $('svgA'); svg.innerHTML = '';
+    const xt = I.tiklerKapsa(Math.min(...yh), Math.max(...yh), 5), m = Math.max(...e.map(Math.abs)) * 1.1 || 1, yt = I.tiklerKapsa(-m, m, 6);
+    const sx = I.olcek(xt[0], xt[xt.length - 1], L, W - R), sy = I.olcek(yt[0], yt[yt.length - 1], H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x: sx, y: sy, xt, yt, xEt: 'Tahmin edilen ŷ', yEt: 'Artık e'});
+    el('line', {x1: L, x2: W - R, y1: sy(0), y2: sy(0), stroke: '#c8202e', 'stroke-width': 1.5, 'stroke-dasharray': '6 4'}, svg);
+    el('text', {x: W - R - 4, y: sy(0) - 6, 'text-anchor': 'end', 'font-size': 10.5, fill: '#c8202e', 'font-weight': 700}, svg, 'Referans e = 0');
+    yh.forEach((v, i) => el('circle', {cx: sx(v), cy: sy(e[i]), r: 5, fill: renk, 'fill-opacity': .75}, svg));
+    // Q-Q
+    svg = $('svgQ'); svg.innerHTML = ''; const n = e.length, s = I.sd(e) || 1;
+    const es = e.slice().sort((a, b) => a - b), q = es.map((_, i) => I.invPhi((i + 1 - .375) / (n + .25)));
+    const qt = I.tiklerKapsa(Math.min(...q), Math.max(...q), 5), et = I.tiklerKapsa(Math.min(...es), Math.max(...es), 6);
+    const qx = I.olcek(qt[0], qt[qt.length - 1], L, W - R), qy = I.olcek(et[0], et[et.length - 1], H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x: qx, y: qy, xt: qt, yt: et, xEt: 'Kuramsal normal kantiller', yEt: 'Örneklem artıkları'});
+    el('line', {x1: qx(qt[0]), y1: qy(I.ort(e) + s * qt[0]), x2: qx(qt[qt.length - 1]), y2: qy(I.ort(e) + s * qt[qt.length - 1]), stroke: '#c8202e', 'stroke-width': 1.8}, svg);
+    es.forEach((v, i) => el('circle', {cx: qx(q[i]), cy: qy(v), r: 5, fill: renk, 'fill-opacity': .75}, svg));
+  }
+  $('vSec').addEventListener('change', e => veriAyarla(e.target.value));
+  $('xSec').addEventListener('change', e => { X = e.target.value; ciz(); });
+  $('ySec').addEventListener('change', e => { Y = e.target.value; ciz(); });
+  ['mDog', 'mKad'].forEach(id => $(id).addEventListener('change', ciz));
+  $('tahX').addEventListener('input', () => tahmin(modeller()));
+  document.querySelectorAll('#artSec .btn').forEach(b => b.addEventListener('click', () => { artMod = b.dataset.a; document.querySelectorAll('#artSec .btn').forEach(x => x.classList.toggle('aktif', x === b));
+    if (artMod === 'kad' && !$('mKad').checked) { $('mKad').checked = true; ciz(); } else artiklar(modeller()); }));
+  $('ipucuBtn').addEventListener('click', () => $('ipucuAlan').classList.toggle('acik-d'));
+  $('hamBtn').addEventListener('click', () => $('hamAlan').classList.toggle('gizli'));
+  function ozelYukle(d, ad) {
+    if (d.sayisal.length < 2) { alert('En az iki sayısal sütun gerekli.'); return; }
+    const anahtarK = d.kategorik[0];
+    ds = {anahtar: anahtarK || '#', kolonlar: d.sayisal, satir: d.veri.map((r, i) => ({...r, _ad: anahtarK ? r[anahtarK] : i + 1})), x: d.sayisal[0], y: d.sayisal[1], acik: `Kendi veriniz: ${ad} — ${d.veri.length} satır, ${d.sayisal.length} sayısal sütun.`};
+    $('vSec').value = 'ozel'; hazirla();
+  }
+  $('hamYukle').addEventListener('click', () => { try { ozelYukle(I.csvOku($('hamMetin').value), 'yapıştırılan veri'); } catch (e) { alert('Veri okunamadı: ' + e.message); } });
+  $('dosyaBtn').addEventListener('click', () => $('dosya').click());
+  $('dosya').addEventListener('change', async () => { const fl = $('dosya').files[0]; if (!fl) return; try { ozelYukle(await I.dosyaOku(fl), fl.name); } catch (e) { alert('Dosya okunamadı: ' + e.message); } });
+  veriAyarla('araba');
+})();
+</script>
+</body>
+</html>

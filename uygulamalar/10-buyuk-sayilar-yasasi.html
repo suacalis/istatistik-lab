@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Büyük Sayılar Yasası Simülatörü · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .ana{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start}
+  @media (max-width:980px){.ana{grid-template-columns:1fr}}
+  .nesne{background:#f7f7f6;border:1px solid var(--kenar);border-radius:14px;text-align:center;padding:18px}
+  .nesne .durum{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--soluk);margin-top:10px}
+  .nesne .sonuc{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--mavi)}
+  @keyframes don{0%{transform:rotateY(0)}100%{transform:rotateY(720deg)}}
+  .doner{animation:don .45s ease-out}
+  @keyframes zipla{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.15)}100%{transform:rotate(360deg) scale(1)}}
+  .zipla{animation:zipla .4s ease-out}
+  .metrik{border:1px solid var(--kenar);border-radius:10px;padding:10px 12px;margin-top:8px;background:#fff}
+  .metrik .e{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--soluk)}
+  .metrik .d{font-family:var(--mono);font-size:24px;font-weight:800;color:var(--mavi)}
+  .metrik.vurgu{background:var(--kirmizi-acik);border-color:#f5c4c9}.metrik.vurgu .d{color:var(--kirmizi)}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Büyük Sayılar Yasası Simülatörü</h1></a>
+  <div class="sag-ust">
+    <nav class="sekmeler"><button class="sekme aktif" data-hedef="para" id="sPara">🪙 Yazı-Tura Modu</button><button class="sekme" data-hedef="zar" id="sZar">🎲 Zar Modu</button></nav>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+<div class="gizli"><div class="panel" id="para"></div><div class="panel" id="zar"></div></div>
+
+<main class="icerik">
+  <div class="ana">
+    <aside class="kart">
+      <p class="kb">Simülasyon Parametreleri</p>
+      <div id="paraAyar">
+        <div class="bas"><span style="font-size:13px;font-weight:700">⫼ Kuramsal P(Tura)</span><span class="rozet r-kirmizi" id="pR">p = 0,50</span></div>
+        <input type="range" class="ac-kirmizi" id="p" min="0.1" max="0.9" step="0.01" value="0.5">
+        <div class="olcek"><span>0,10</span><span>ADİL (0,50)</span><span>0,90</span></div>
+      </div>
+      <div id="zarAyar" class="gizli">
+        <div class="hesap">KURAMSAL BEKLENEN DEĞER<br><b style="font-size:14px">E[X] = (1+2+3+4+5+6) / 6 = 3,5000</b></div>
+      </div>
+      <div class="nesne" style="margin-top:14px">
+        <svg id="nesneSvg" viewBox="0 0 120 120" width="110" height="110"></svg>
+        <div class="durum" id="sonEt">SON ATIŞ SONUCU</div>
+        <div class="sonuc" id="sonDeger">Simülasyon bekleniyor</div>
+      </div>
+      <p class="kb" style="margin-top:16px">Güncel Göstergeler</p>
+      <div class="metrik"><div class="e" id="m1e">TOPLAM ATIŞ (N)</div><div class="d" id="m1">0</div></div>
+      <div class="metrik"><div class="e" id="m2e">TOPLAM TURA</div><div class="d" id="m2">0</div></div>
+      <div class="metrik vurgu"><div class="e" id="m3e">ORAN p̂</div><div class="d" id="m3">0,0000</div></div>
+      <div class="metrik"><div class="e" id="m4e">SAPMA |p̂ − p|</div><div class="d" id="m4">—</div></div>
+    </aside>
+
+    <div class="yigin">
+      <div class="btn-grup">
+        <button class="btn kirmizi" id="b5000">Simüle Et: 5.000 Atış</button>
+        <button class="btn birincil" id="b1">Atış +1</button>
+        <button class="btn birincil" id="b100">Atış +100</button>
+        <button class="btn" id="bSifir">↺ Sıfırla (seriyi sakla)</button>
+      </div>
+      <section class="kart">
+        <div class="grafik-ust">
+          <div><p class="kb">Gidişat Oranı ve Beklenen Değere Yakınsama</p><div class="acik" id="durumMetin">Henüz deneme yok. Simülasyon için düğmelere tıklayın!</div></div>
+          <div class="lejant"><span><i class="cizgi" style="background:#0b4a8b"></i>Gidişat ortalaması</span><span><i class="cizgi" style="background:#c8202e"></i><span id="lejBek">Beklenen değer (0,50)</span></span><span><i class="cizgi" style="background:#cbd5e1"></i>Önceki seriler</span></div>
+        </div>
+        <div class="tuval" id="tuval"><button class="buyut" data-tuval="tuval"></button><svg id="svg" viewBox="0 0 900 400"></svg></div>
+        <label class="onay" style="margin-top:8px"><input type="checkbox" id="logX">X eksenini logaritmik göster (erken dalgalanmaları daha iyi görmek için)</label>
+      </section>
+      <div class="izgara-2">
+        <section class="kart"><p class="kb">Sonuçların Dağılımı</p><svg id="svgF" viewBox="0 0 440 210"></svg></section>
+        <div class="not mavi" id="hedef"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 10 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  let mod = 'para', yol = [], top = 0, n = 0, son = null, sayac = [], eski = [], calisiyor = false;
+  const p = () => +$('p').value, bek = () => mod === 'para' ? p() : 3.5;
+  function sifirla(sakla) {
+    if (sakla && yol.length > 1) { eski.push(yol); if (eski.length > 5) eski.shift(); }
+    yol = []; top = 0; n = 0; son = null; sayac = mod === 'para' ? [0, 0] : [0, 0, 0, 0, 0, 0]; guncelle(); nesne(); }
+  function deneme(k) {
+    for (let i = 0; i < k; i++) {
+      let v; if (mod === 'para') { v = Math.random() < p() ? 1 : 0; sayac[v ? 0 : 1]++; } else { v = 1 + Math.floor(Math.random() * 6); sayac[v - 1]++; }
+      top += v; n++; son = v; yol.push(top / n);
+    } }
+  function nesne(anim) {
+    const s = $('nesneSvg'); s.innerHTML = '';
+    if (mod === 'para') {
+      const g = el('g', {style: 'transform-origin:60px 60px;transform-box:fill-box'}, s);
+      el('circle', {cx: 60, cy: 60, r: 52, fill: son === null ? '#d1d5db' : son ? '#fbbf24' : '#cbd5e1', stroke: son === null ? '#9ca3af' : son ? '#b45309' : '#64748b', 'stroke-width': 5}, g);
+      el('circle', {cx: 60, cy: 60, r: 40, fill: 'none', stroke: 'rgba(0,0,0,.15)', 'stroke-width': 2, 'stroke-dasharray': '3 3'}, g);
+      el('text', {x: 60, y: 74, 'text-anchor': 'middle', 'font-size': 40, 'font-weight': 800, fill: '#1d2433', 'font-family': 'Georgia,serif'}, g, son === null ? '?' : son ? 'T' : 'Y');
+      if (anim) { g.classList.remove('doner'); void g.getBBox(); g.classList.add('doner'); }
+      $('sonDeger').textContent = son === null ? 'Simülasyon bekleniyor' : son ? 'TURA (T)' : 'YAZI (Y)';
+    } else {
+      const g = el('g', {style: 'transform-origin:60px 60px;transform-box:fill-box'}, s);
+      el('rect', {x: 10, y: 10, width: 100, height: 100, rx: 18, fill: '#fff', stroke: '#1d2433', 'stroke-width': 4}, g);
+      const P = {1: [[60, 60]], 2: [[35, 35], [85, 85]], 3: [[35, 35], [60, 60], [85, 85]], 4: [[35, 35], [85, 35], [35, 85], [85, 85]], 5: [[35, 35], [85, 35], [60, 60], [35, 85], [85, 85]], 6: [[35, 32], [85, 32], [35, 60], [85, 60], [35, 88], [85, 88]]};
+      if (son === null) el('text', {x: 60, y: 76, 'text-anchor': 'middle', 'font-size': 44, 'font-weight': 800, fill: '#9ca3af'}, g, '?');
+      else P[son].forEach(([x, y]) => el('circle', {cx: x, cy: y, r: 9, fill: son === 1 ? '#c8202e' : '#1d2433'}, g));
+      if (anim) { g.classList.remove('zipla'); void g.getBBox(); g.classList.add('zipla'); }
+      $('sonDeger').textContent = son === null ? 'Simülasyon bekleniyor' : son;
+    }
+  }
+  function guncelle() {
+    const b = bek(), ort = n ? top / n : 0;
+    $('m1').textContent = n.toLocaleString('tr-TR'); $('m2').textContent = mod === 'para' ? top.toLocaleString('tr-TR') : top.toLocaleString('tr-TR');
+    $('m3').textContent = f(ort, 4); $('m4').textContent = n ? f(Math.abs(ort - b), 4) : '—';
+    $('lejBek').textContent = `Beklenen değer (${f(b, 2)})`;
+    $('durumMetin').textContent = n ? `${n.toLocaleString('tr-TR')} deneme sonrasında gidişat ortalaması ${f(ort, 4)}; beklenen değerden sapma ${f(Math.abs(ort - b), 4)}.` : 'Henüz deneme yok. Simülasyon için düğmelere tıklayın!';
+    ciz(); frek();
+  }
+  function ciz() {
+    const svg = $('svg'); svg.innerHTML = ''; const W = 900, H = 400, L = 66, R = 24, T = 18, B = 50, log = $('logX').checked;
+    const nMax = Math.max(100, yol.length, ...eski.map(e => e.length));
+    const lo = mod === 'para' ? 0 : 1, hi = mod === 'para' ? 1 : 6;
+    const xd = log ? I.olcek(0, Math.log10(nMax), L, W - R) : I.olcek(1, nMax, L, W - R), x = v => log ? xd(Math.log10(v)) : xd(v);
+    const y = I.olcek(lo, hi, H - B, T);
+    const yt = mod === 'para' ? [0, .2, .4, .6, .8, 1] : [1, 2, 3, 4, 5, 6];
+    const xt = log ? [1, 10, 100, 1000, 10000, 100000].filter(v => v <= nMax) : I.tikler(1, nMax, 6).filter(v => v >= 1).concat(nMax <= 100 ? [] : []);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y, xt: log ? xt : [1, ...I.tikler(0, nMax, 5).filter(v => v > 1)], yt, xEt: 'DENEME SAYISI (N)', yEt: mod === 'para' ? 'TURA ORANI' : 'GİDİŞAT ORTALAMASI', xBicim: v => v.toLocaleString('tr-TR')});
+    const b = bek();
+    el('line', {x1: L, x2: W - R, y1: y(b), y2: y(b), stroke: '#c8202e', 'stroke-width': 2, 'stroke-dasharray': '7 5'}, svg);
+    el('text', {x: L + 6, y: y(b) - 6, 'font-size': 11.5, 'font-weight': 700, fill: '#c8202e', ...I.halo}, svg, f(b, 2));
+    const cizgi = (dizi, renk, kal) => { if (dizi.length < 1) return; const adim = Math.max(1, Math.floor(dizi.length / 1500)); let d = '';
+      for (let i = 0; i < dizi.length; i += adim) d += (i ? ' L' : 'M') + x(i + 1).toFixed(1) + ',' + y(dizi[i]).toFixed(1);
+      d += ' L' + x(dizi.length).toFixed(1) + ',' + y(dizi[dizi.length - 1]).toFixed(1);
+      el('path', {d, fill: 'none', stroke: renk, 'stroke-width': kal, 'stroke-linejoin': 'round'}, svg); };
+    eski.forEach(e => cizgi(e, '#cbd5e1', 1.4));
+    // ±2 standart hata zarfı
+    const sd = mod === 'para' ? Math.sqrt(b * (1 - b)) : Math.sqrt(35 / 12); let zarf = '', zarf2 = '';
+    for (let i = 1; i <= nMax; i += Math.max(1, Math.floor(nMax / 400))) { zarf += (zarf ? ' L' : 'M') + x(i) + ',' + y(Math.min(hi, b + 2 * sd / Math.sqrt(i))); zarf2 = ' L' + x(i) + ',' + y(Math.max(lo, b - 2 * sd / Math.sqrt(i))) + zarf2; }
+    el('path', {d: zarf + zarf2.replace(/^ L/, ' L') + ' Z', fill: 'rgba(200,32,46,.06)', stroke: 'none'}, svg);
+    cizgi(yol, '#0b4a8b', 2.2);
+    if (yol.length) el('circle', {cx: x(yol.length), cy: y(yol[yol.length - 1]), r: 4.5, fill: '#0b4a8b'}, svg);
+  }
+  function frek() {
+    const svg = $('svgF'); svg.innerHTML = ''; const W = 440, H = 210, L = 40, R = 10, T = 14, B = 34;
+    const et = mod === 'para' ? ['Tura', 'Yazı'] : ['1', '2', '3', '4', '5', '6'];
+    const kuram = mod === 'para' ? [p(), 1 - p()] : Array(6).fill(1 / 6);
+    const oran = sayac.map(c => n ? c / n : 0); const mx = Math.max(...oran, ...kuram) * 1.15;
+    const y = I.olcek(0, mx, H - B, T), bw = (W - L - R) / et.length;
+    I.eksenler(svg, {W, H, L, R, T, B, x: v => v, y, xt: [], yt: I.tikler(0, mx, 4), yBicim: v => '%' + f(v * 100, 0)});
+    et.forEach((e, i) => { const x0 = L + i * bw;
+      el('rect', {x: x0 + bw * .2, y: y(oran[i]), width: bw * .6, height: y(0) - y(oran[i]), fill: '#0b4a8b', 'fill-opacity': .8}, svg);
+      el('line', {x1: x0 + bw * .1, x2: x0 + bw * .9, y1: y(kuram[i]), y2: y(kuram[i]), stroke: '#c8202e', 'stroke-width': 2.5, 'stroke-dasharray': '4 3'}, svg);
+      el('text', {x: x0 + bw / 2, y: H - B + 16, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700}, svg, e);
+      if (n) el('text', {x: x0 + bw / 2, y: y(oran[i]) - 4, 'text-anchor': 'middle', 'font-size': 10.5, fill: '#333'}, svg, I.yz(oran[i])); });
+    el('text', {x: W - R, y: T + 2, 'text-anchor': 'end', 'font-size': 10.5, fill: '#c8202e'}, svg, '- - kuramsal olasılık');
+  }
+  async function calistir(k, animasyon) {
+    if (calisiyor) return; calisiyor = true; ['b5000', 'b1', 'b100', 'bSifir'].forEach(id => $(id).disabled = true);
+    if (animasyon) { const parca = 50; for (let i = 0; i < k; i += parca) { deneme(Math.min(parca, k - i)); guncelle(); await I.bekle(12); } }
+    else deneme(k);
+    nesne(true); guncelle();
+    calisiyor = false; ['b5000', 'b1', 'b100', 'bSifir'].forEach(id => $(id).disabled = false);
+  }
+  function modAyarla(m) {
+    mod = m; eski = [];
+    $('paraAyar').classList.toggle('gizli', m !== 'para'); $('zarAyar').classList.toggle('gizli', m !== 'zar');
+    const ad = m === 'para' ? 'Atış' : 'Zar Atışı';
+    $('b5000').textContent = `Simüle Et: 5.000 ${m === 'para' ? 'Atış' : 'Zar'}`; $('b1').textContent = `${ad} +1`; $('b100').textContent = `${ad} +100`;
+    $('sonEt').textContent = m === 'para' ? 'SON ATIŞ SONUCU' : 'SON ZAR DEĞERİ';
+    $('m1e').textContent = m === 'para' ? 'TOPLAM ATIŞ (N)' : 'TOPLAM ZAR ATIŞI (N)'; $('m2e').textContent = m === 'para' ? 'TOPLAM TURA' : 'BİRİKİMLİ TOPLAM';
+    $('m3e').textContent = m === 'para' ? 'ORAN p̂' : 'GİDİŞAT ORTALAMASI x̄'; $('m4e').textContent = m === 'para' ? 'SAPMA |p̂ − p|' : 'SAPMA |x̄ − 3,5|';
+    $('hedef').innerHTML = m === 'para'
+      ? '<b>Öğrenme hedefi:</b> n 5.000\'e yaklaştıkça sapma göstergesinin 0,0000\'a doğru küçüldüğünü doğrulayın. Eğrinin başlangıçtaki sert sıçramaları küçük n\'deki örnekleme hatasını temsil eder: <b>küçük bir deney kolayca yanlış bir istatistiksel tablo verebilir.</b> Pembe zarf, beklenen ±2 standart hata bandıdır ve 1/√n hızında daralır.<br><br><i>Dikkat — "kumarbaz yanılgısı":</i> Üst üste 5 tura gelmesi, sıradaki atışta yazı gelme olasılığını artırmaz. Ortalama, geçmişteki sapmalar "düzeltildiği" için değil, yeni denemeler onları <b>seyrelttiği</b> için yakınsar.'
+      : '<b>Önemli zar gözlemi:</b> Tek bir atış yalnızca 1, 2, 3, 4, 5 ya da 6 olabilir. Ancak beklenen ortalama değer <b>3,5000</b>\'dir — tek bir denemede bu değeri atmak fiziksel olarak imkânsızdır! Bu, beklenen değerlerin tek denemenin sonucu değil, <b>uzun dönemde ulaşılan kuramsal ağırlıklı ortalama</b> olduğunu öğretir.';
+    sifirla(false);
+  }
+  $('b5000').addEventListener('click', () => calistir(5000, true));
+  $('b1').addEventListener('click', () => calistir(1));
+  $('b100').addEventListener('click', () => calistir(100, true));
+  $('bSifir').addEventListener('click', () => sifirla(true));
+  $('p').addEventListener('input', () => { $('pR').textContent = 'p = ' + f(p(), 2); eski = []; sifirla(false); });
+  $('logX').addEventListener('change', ciz);
+  window.addEventListener('sekme', e => modAyarla(e.detail));
+  modAyarla('para');
+})();
+</script>
+</body>
+</html>

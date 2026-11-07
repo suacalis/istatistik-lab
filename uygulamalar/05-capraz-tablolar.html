@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Çapraz Tablolar ve Simpson Paradoksu · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .hikaye{max-width:1100px;margin:0 auto}
+  .hikaye h2{font-size:26px}
+  .hikaye p{font-size:15px;line-height:1.65;margin:8px 0}
+  .hedef{border-left:4px solid var(--mavi);background:var(--mavi-acik);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  .uyari{border-left:4px solid var(--kirmizi);background:var(--kirmizi-acik);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  table.veri tbody tr{cursor:pointer}
+  table.veri tbody tr.secili{background:#fff7e6}
+  table.veri td.marj,table.veri th.marj{background:#f7f7f6;font-weight:700}
+  .faz{display:flex;gap:10px;align-items:flex-start;background:#eef3fb;border:1px solid #c9d8ee;border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.55;margin:12px 0}
+  .faz .i{width:22px;height:22px;border-radius:50%;background:var(--mavi);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Çapraz Tablolar ve Simpson Paradoksu</h1></a>
+  <div class="sag-ust">
+    <nav class="sekmeler"><button class="sekme aktif" data-hedef="p1">▦ Çapraz Tablolar</button><button class="sekme" data-hedef="p2">⚠ Simpson Paradoksu</button></nav>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+
+<main class="icerik">
+  <!-- ============ SEKME 1 ============ -->
+  <section class="panel aktif" id="p1"><div class="hikaye yigin">
+    <section class="kart">
+      <h2>Vaka Çalışması: Spotify'da Şarkı Atlama Davranışı</h2>
+      <p>Spotify gibi müzik platformları, bir dinleyicinin şarkıyı sonuna kadar dinleyip dinlemediğine ya da atlayıp atlamadığına dair ayrıntılı kayıtlar tutar. Burada 2010'lardan bu yana pop müzik sahnesinde etkin olan ve dinleyici kitleleri örtüşen üç popüler sanatçıya odaklanıyoruz: <b>Bruno Mars, Maroon 5 ve Taylor Swift</b>.</p>
+      <div class="hedef"><b style="color:var(--mavi)">Amacımız:</b><br><i>Atlama davranışının sanatçılara göre farklılaşıp farklılaşmadığını görmek ve bu tür verilerin çapraz (olumsallık) tablolar, marjinal dağılımlar ve koşullu dağılımlarla nasıl özetlendiğini anlamak.</i></div>
+      <p class="ipucu-k">Veri kaynağı: kaggle.com/anandshaw2001/top-spotify-songs-in-countries</p>
+    </section>
+    <section class="kart">
+      <div class="grafik-ust">
+        <div><h2 style="font-size:21px">1. Bölüm: Çapraz Tablo</h2><div class="acik">Bireylerin her iki değişkene göre nasıl dağıldığı.</div></div>
+        <div class="btn-grup" id="modSec" style="flex:0 0 auto">
+          <button class="btn aktif" data-m="sayi">Sayılar</button><button class="btn" data-m="satir">Satır %</button><button class="btn" data-m="sutun">Sütun %</button><button class="btn" data-m="toplam">Toplam %</button>
+        </div>
+      </div>
+      <table class="veri" id="tablo"></table>
+      <p class="ipucu-k" style="margin-top:8px">Aşağıdaki grafikte vurgulamak için bir sanatçının satırına tıklayın.</p>
+      <div class="not mavi" id="modAcik" style="margin-top:8px"></div>
+    </section>
+    <section class="kart">
+      <div class="grafik-ust">
+        <div><h2 style="font-size:21px">2. Bölüm: Koşullu Dağılım</h2><div class="acik" id="kosulAcik"></div></div>
+        <div class="btn-grup" id="kosulSec" style="flex:0 0 auto"><button class="btn aktif" data-k="sanatci">Sanatçıya göre</button><button class="btn" data-k="durum">Atlama durumuna göre</button></div>
+      </div>
+      <div class="tuval" id="tuval1"><button class="buyut" data-tuval="tuval1"></button><svg id="svg1" viewBox="0 0 900 340"></svg></div>
+      <div class="lejant" style="margin-top:8px" id="lejant1"></div>
+      <div class="icgoru" style="margin-top:12px"><span class="et">YORUM</span><div id="yorum1"></div></div>
+    </section>
+  </div></section>
+
+  <!-- ============ SEKME 2 ============ -->
+  <section class="panel" id="p2"><div class="hikaye yigin">
+    <section class="kart">
+      <h2>Platform Etkeni</h2>
+      <p>Şimdi üçüncü bir kategorik değişken ekliyoruz: dinlemede kullanılan <b>platform ya da cihaz</b> (Mobil ve Bilgisayar). İlk bakışta Maroon 5'in genel atlama oranı Bruno Mars'ınkinden yüksek görünüyor. Ancak yalnızca genel yüzdelere bakmak yanıltıcı olabilir.</p>
+      <div class="uyari"><b style="color:var(--kirmizi)">Dikkatli olun:</b><br><i>Değişkenleri ayrı ayrı incelemeyi unutmayın. Birleştirilmiş (toplulaştırılmış) veride görülen eğilimler, veri alt gruplara ayrıldığında <b>tersine dönebilir</b>. İşte bu, Simpson Paradoksu'dur.</i></div>
+    </section>
+    <section class="kart">
+      <div class="grafik-ust">
+        <div><h2 style="font-size:21px">Simpson Paradoksu Gezgini</h2><div class="acik">"Platform" gizli (karıştırıcı) değişkeninin atlama eğilimini nasıl tersine çevirdiğini keşfedin.</div></div>
+        <button class="btn kirmizi" id="fazBtn">Platforma Göre Ayır →</button>
+      </div>
+      <div class="faz" id="faz"></div>
+      <div class="tuval" id="tuval2"><button class="buyut" data-tuval="tuval2"></button><svg id="svg2" viewBox="0 0 900 360"></svg></div>
+      <div class="lejant" style="margin-top:8px"><span><i style="background:#0b4a8b;border-radius:2px"></i>Bruno Mars</span><span><i style="background:#c8202e;border-radius:2px"></i>Maroon 5</span></div>
+      <div class="izgara-2" style="margin-top:16px">
+        <table class="veri" id="altTablo"></table>
+        <div><p class="kb">Kim hangi cihazda dinleniyor?</p><svg id="svg3" viewBox="0 0 440 170"></svg></div>
+      </div>
+    </section>
+    <section class="kart">
+      <h2 style="font-size:21px">"Gizli" Değişken</h2>
+      <p>Simpson Paradoksu, platform dağılımı sanatçılar arasında <b>dengesiz</b> olduğu için ortaya çıkar. Bu vaka çalışmasında:</p>
+      <ul style="font-size:15px;line-height:1.7">
+        <li>Maroon 5 dinlemelerinin çok daha büyük kısmı <b>Mobil</b> cihazlardan gelir (<span id="mMob"></span> ve Bruno Mars'ta <span id="bMob"></span>).</li>
+        <li>Mobil cihazlarda atlama oranları <b>tüm sanatçılar için</b> doğası gereği daha yüksektir.</li>
+        <li>Her iki platformda da ayrı ayrı bakıldığında <b>Bruno Mars daha sık atlanır</b>; yine de toplamda Maroon 5 daha sık atlanmış görünür.</li>
+      </ul>
+      <div class="not turuncu"><i>"Durun — yani Maroon 5'in şarkıları aslında daha atlanası değil; sadece dinleyicileri atlamaya daha yatkın cihazlar kullanıyor!"</i><br><b>İşte iş başında istatistik.</b></div>
+      <p class="ipucu-k" style="margin-top:10px">Not: Platform kırılımı, kavramı göstermek amacıyla genel toplamlarla tutarlı olacak biçimde kurgulanmış öğretim verisidir.</p>
+    </section>
+  </div></section>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 05 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  const SAN = ['Bruno Mars', 'Maroon 5', 'Taylor Swift'], DUR = ['Atlanmadı', 'Atlandı'];
+  const T = {'Bruno Mars': [386, 21], 'Maroon 5': [543, 38], 'Taylor Swift': [128, 14]};
+  const RENK_D = ['#0b4a8b', '#c8202e'], RENK_S = ['#0b4a8b', '#c8202e', '#14966f'];
+  let mod = 'sayi', secili = null, kosul = 'sanatci';
+  const satirT = s => T[s][0] + T[s][1], sutunT = j => SAN.reduce((t, s) => t + T[s][j], 0), N = SAN.reduce((t, s) => t + satirT(s), 0);
+  const hucre = (v, s, j) => mod === 'sayi' ? v.toLocaleString('tr-TR') : mod === 'satir' ? I.yz(v / satirT(s)) : mod === 'sutun' ? I.yz(v / sutunT(j)) : I.yz(v / N);
+  function tablo() {
+    const marj = (v, tip) => mod === 'sayi' ? v.toLocaleString('tr-TR') : (mod === 'satir' && tip === 'satir') || (mod === 'sutun' && tip === 'sutun') ? '%100,0' : I.yz(v / N);
+    let h = `<thead><tr><th>Sanatçı</th>${DUR.map(d => `<th>${d}</th>`).join('')}<th class="marj">Toplam</th></tr></thead><tbody>`;
+    SAN.forEach(s => h += `<tr data-s="${s}" class="${secili === s ? 'secili' : ''}"><td><b>${s}</b></td>${T[s].map((v, j) => `<td>${hucre(v, s, j)}</td>`).join('')}<td class="marj">${marj(satirT(s), 'satir')}</td></tr>`);
+    h += `<tr class="toplam"><td>Toplam</td>${[0, 1].map(j => `<td>${marj(sutunT(j), 'sutun')}</td>`).join('')}<td>${mod === 'sayi' ? N.toLocaleString('tr-TR') : '%100,0'}</td></tr></tbody>`;
+    $('tablo').innerHTML = h;
+    $('modAcik').innerHTML = {
+      sayi: '<b>Sayılar:</b> Her hücre, iki değişkenin o birleşimine düşen gözlem sayısıdır. En sağdaki sütun ve en alttaki satır <b>marjinal dağılımları</b> verir.',
+      satir: '<b>Satır yüzdeleri:</b> Her sanatçının <i>kendi</i> dinlemeleri içinde atlama oranı. Bu, <b>sanatçıya göre koşullu dağılımdır</b> — sanatçıları karşılaştırmanın doğru yolu budur.',
+      sutun: '<b>Sütun yüzdeleri:</b> Örneğin atlanan şarkıların yüzde kaçının hangi sanatçıya ait olduğu. Bu, <b>atlama durumuna göre koşullu dağılımdır</b>.',
+      toplam: '<b>Toplam yüzdeleri:</b> Her hücrenin tüm gözlemler (N = 1.130) içindeki payı — <b>ortak (birleşik) dağılım</b>.'}[mod];
+  }
+  $('tablo').addEventListener('click', e => { const tr = e.target.closest('tr[data-s]'); if (!tr) return; secili = secili === tr.dataset.s ? null : tr.dataset.s; tablo(); grafik1(); });
+  document.querySelectorAll('#modSec .btn').forEach(b => b.addEventListener('click', () => { mod = b.dataset.m; document.querySelectorAll('#modSec .btn').forEach(x => x.classList.toggle('aktif', x === b)); tablo(); }));
+  document.querySelectorAll('#kosulSec .btn').forEach(b => b.addEventListener('click', () => { kosul = b.dataset.k; document.querySelectorAll('#kosulSec .btn').forEach(x => x.classList.toggle('aktif', x === b)); grafik1(); }));
+
+  function grafik1() {
+    const svg = $('svg1'); svg.innerHTML = ''; const W = 900, H = 340, L = 130, R = 30, Tp = 16, B = 40;
+    const gruplar = kosul === 'sanatci' ? SAN : DUR;
+    const parcalar = kosul === 'sanatci' ? DUR : SAN, renk = kosul === 'sanatci' ? RENK_D : RENK_S;
+    const pay = (g, p) => kosul === 'sanatci' ? T[g][DUR.indexOf(p)] / satirT(g) : T[p][DUR.indexOf(g)] / sutunT(DUR.indexOf(g));
+    const x = I.olcek(0, 1, L, W - R), bh = (H - Tp - B) / gruplar.length;
+    I.eksenler(svg, {W, H, L, R, T: Tp, B, x, y: v => v, xt: [0, .25, .5, .75, 1], yt: [], xBicim: v => '%' + f(v * 100, 0), yEksen: false, izgara: false});
+    gruplar.forEach((g, i) => { let bas = 0; const yy = Tp + i * bh + bh * .18, hh = bh * .64;
+      const soluk = kosul === 'sanatci' && secili && secili !== g;
+      el('text', {x: L - 10, y: yy + hh / 2 + 4, 'text-anchor': 'end', 'font-size': 13, 'font-weight': 700, fill: soluk ? '#bbb' : '#1d2433'}, svg, g);
+      parcalar.forEach((p, j) => { const v = pay(g, p);
+        const r = el('rect', {x: x(bas), y: yy, width: x(bas + v) - x(bas), height: hh, fill: renk[j], 'fill-opacity': soluk ? .2 : 1, stroke: secili === g && kosul === 'sanatci' ? '#f59e0b' : '#fff', 'stroke-width': secili === g && kosul === 'sanatci' ? 3 : 1}, svg);
+        el('title', {}, r, `${g} · ${p}: ${I.yz(v)}`);
+        if (v > .045) el('text', {x: x(bas + v / 2), y: yy + hh / 2 + 4, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#fff'}, svg, I.yz(v));
+        bas += v; }); });
+    $('lejant1').innerHTML = parcalar.map((p, j) => `<span><i style="background:${renk[j]};border-radius:2px"></i>${p}</span>`).join('');
+    $('kosulAcik').textContent = kosul === 'sanatci' ? 'Her sanatçının dinlemeleri içinde atlanan / atlanmayan yüzdesi (satır yüzdeleri).' : 'Atlanan ve atlanmayan şarkılar içinde her sanatçının payı (sütun yüzdeleri).';
+    const o = SAN.map(s => [s, T[s][1] / satirT(s)]).sort((a, b) => b[1] - a[1]);
+    $('yorum1').innerHTML = kosul === 'sanatci'
+      ? `Atlama oranı en yüksek sanatçı <b>${o[0][0]}</b> (${I.yz(o[0][1])}), en düşük <b>${o[2][0]}</b> (${I.yz(o[2][1])}). Genel atlama oranı ${I.yz(sutunT(1) / N)}. Koşullu dağılımlar birbirinden farklıysa iki değişken arasında bir <b>ilişki (bağımlılık)</b> olduğunu düşünürüz; aynı olsaydı değişkenler <b>bağımsız</b> olurdu.`
+      : `Atlanan şarkıların ${I.yz(T['Maroon 5'][1] / sutunT(1))}'i Maroon 5'e aittir — ama bunun nedeni büyük ölçüde Maroon 5'in <b>toplamda daha çok dinlenmesidir</b> (${I.yz(satirT('Maroon 5') / N)}). Sütun yüzdeleri sanatçıları karşılaştırmak için uygun değildir!`;
+  }
+
+  // ============ SİMPSON ============
+  // Toplamlarla tutarlı öğretim verisi: [dinleme, atlama]
+  const ALT = {'Bruno Mars': {Mobil: [150, 12], Bilgisayar: [257, 9]}, 'Maroon 5': {Mobil: [500, 37], Bilgisayar: [81, 1]}};
+  const S2 = ['Bruno Mars', 'Maroon 5'], PL = ['Mobil', 'Bilgisayar'];
+  const oran = (s, p) => p ? ALT[s][p][1] / ALT[s][p][0] : (ALT[s].Mobil[1] + ALT[s].Bilgisayar[1]) / (ALT[s].Mobil[0] + ALT[s].Bilgisayar[0]);
+  let ayrik = false;
+  function simpson() {
+    const svg = $('svg2'); svg.innerHTML = ''; const W = 900, H = 360, L = 70, R = 30, Tp = 30, B = 46;
+    const gruplar = ayrik ? PL : ['Genel'];
+    const y = I.olcek(0, .12, H - B, Tp), gw = (W - L - R) / gruplar.length;
+    I.eksenler(svg, {W, H, L, R, T: Tp, B, x: v => v, y, xt: [], yt: [0, .03, .06, .09, .12], yBicim: v => '%' + f(v * 100, 0), yEt: 'Atlama oranı'});
+    gruplar.forEach((g, i) => { const cx = L + gw * i + gw / 2, bw = Math.min(110, gw * .28);
+      el('text', {x: cx, y: H - B + 22, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 700, fill: '#333'}, svg, g === 'Genel' ? 'Genel (tüm platformlar)' : g);
+      S2.forEach((s, j) => { const v = oran(s, g === 'Genel' ? null : g), x0 = cx + (j - 1) * bw * 1.1 + bw * .05;
+        el('rect', {x: x0, y: y(v), width: bw, height: y(0) - y(v), fill: RENK_S[j], rx: 3}, svg);
+        el('text', {x: x0 + bw / 2, y: y(v) - 7, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 800, fill: RENK_S[j]}, svg, I.yz(v, 2)); }); });
+    $('faz').innerHTML = ayrik
+      ? `<span class="i">2</span><div><b>2. Aşama: Ayrıştırılmış görünüm.</b> Dinleme cihazına göre ayırdığımızda, Bruno Mars'ın atlama oranı <b>hem Mobil'de</b> (${I.yz(oran('Bruno Mars', 'Mobil'), 2)} ve ${I.yz(oran('Maroon 5', 'Mobil'), 2)}) <b>hem de Bilgisayar'da</b> (${I.yz(oran('Bruno Mars', 'Bilgisayar'), 2)} ve ${I.yz(oran('Maroon 5', 'Bilgisayar'), 2)}) daha yüksektir. Genel eğilim tersine döndü, çünkü Maroon 5 çok daha fazla Mobil cihazda dinleniyor!</div>`
+      : `<span class="i">1</span><div><b>1. Aşama: Toplulaştırılmış görünüm.</b> Genel veriye bakıldığında <b style="color:var(--kirmizi)">Maroon 5</b>'in atlama oranı (${I.yz(oran('Maroon 5'), 2)}), <b style="color:var(--mavi)">Bruno Mars</b>'ınkinden (${I.yz(oran('Bruno Mars'), 2)}) yüksektir. Maroon 5 nesnel olarak "daha atlanası" mı?</div>`;
+    $('fazBtn').textContent = ayrik ? '← Genel Toplamı Göster' : 'Platforma Göre Ayır →';
+    $('altTablo').innerHTML = `<thead><tr><th>Sanatçı · Platform</th><th>Dinleme</th><th>Atlama</th><th>Atlama oranı</th></tr></thead><tbody>` +
+      S2.flatMap(s => PL.map(p => `<tr><td>${s} · ${p}</td><td>${ALT[s][p][0]}</td><td>${ALT[s][p][1]}</td><td>${I.yz(oran(s, p), 2)}</td></tr>`).concat(`<tr class="toplam"><td>${s} · Toplam</td><td>${ALT[s].Mobil[0] + ALT[s].Bilgisayar[0]}</td><td>${ALT[s].Mobil[1] + ALT[s].Bilgisayar[1]}</td><td>${I.yz(oran(s), 2)}</td></tr>`)).join('') + '</tbody>';
+    const s3 = $('svg3'); s3.innerHTML = ''; const x3 = I.olcek(0, 1, 100, 430);
+    S2.forEach((s, j) => { const top = ALT[s].Mobil[0] + ALT[s].Bilgisayar[0], m = ALT[s].Mobil[0] / top, yy = 20 + j * 70;
+      el('text', {x: 92, y: yy + 26, 'text-anchor': 'end', 'font-size': 13, 'font-weight': 700, fill: RENK_S[j]}, s3, s);
+      el('rect', {x: x3(0), y: yy, width: x3(m) - x3(0), height: 40, fill: '#7c3aed'}, s3);
+      el('rect', {x: x3(m), y: yy, width: x3(1) - x3(m), height: 40, fill: '#a3a3a3'}, s3);
+      el('text', {x: x3(m / 2), y: yy + 25, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#fff'}, s3, 'Mobil ' + I.yz(m, 0));
+      el('text', {x: x3((1 + m) / 2), y: yy + 25, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#fff'}, s3, I.yz(1 - m, 0)); });
+    $('mMob').textContent = I.yz(ALT['Maroon 5'].Mobil[0] / 581, 0); $('bMob').textContent = I.yz(ALT['Bruno Mars'].Mobil[0] / 407, 0);
+  }
+  $('fazBtn').addEventListener('click', () => { ayrik = !ayrik; simpson(); });
+  tablo(); grafik1(); simpson();
+})();
+</script>
+</body>
+</html>

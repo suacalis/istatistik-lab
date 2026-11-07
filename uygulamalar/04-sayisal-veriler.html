@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sayısal Verileri Keşfet · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .grafik-sekme{display:flex;gap:4px;border-bottom:1px solid var(--kenar);margin-bottom:12px;flex-wrap:wrap}
+  .grafik-sekme button{border:0;background:none;padding:9px 14px;font-weight:700;font-size:12.5px;letter-spacing:.04em;color:var(--soluk);cursor:pointer;border-bottom:2px solid transparent;font-family:inherit}
+  .grafik-sekme button.aktif{color:var(--kirmizi);border-bottom-color:var(--kirmizi)}
+  .govde{font-family:var(--mono);font-size:15px;line-height:1.9;padding:10px 20px}
+  .govde .s{display:inline-block;width:48px;text-align:right;padding-right:12px;border-right:2px solid var(--mavi);margin-right:12px;font-weight:800;color:var(--mavi)}
+  .sekil .btn{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:7px;text-align:left}
+  .sekil .btn.aktif{background:var(--kirmizi);border-color:var(--kirmizi)}
+  .istat-izgara{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .istat-izgara .gosterge{text-align:center;padding:10px}
+  .istat-izgara .gosterge .d{font-size:19px}
+  @media (max-width:700px){.istat-izgara{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Sayısal Verileri Keşfet</h1></a>
+  <div class="sag-ust">
+    <nav class="sekmeler"><button class="sekme aktif" data-hedef="p1">📖 Vaka Çalışması</button><button class="sekme" data-hedef="p2">🧪 Etkileşimli Laboratuvar</button></nav>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+
+<main class="icerik">
+  <!-- ============ SEKME 1 ============ -->
+  <section class="panel aktif" id="p1">
+    <div class="izgara" style="grid-template-columns:330px 1fr">
+      <div class="kart">
+        <p class="kb">⤒ Veri Seçimi</p>
+        <div class="birak" id="birak"><div style="font-size:26px">⤒</div><b>VERİ DOSYASINI SÜRÜKLEYİN</b><br>veya <u>dosya seçin</u><br><span class="ipucu-k">CSV, XLSX, XLS</span></div>
+        <input type="file" id="dosya" accept=".csv,.txt,.xlsx,.xls" hidden>
+        <div id="kolonAlan" class="gizli" style="margin-top:10px"><label class="acik">Sayısal değişken</label><select id="kolonSec"></select></div>
+        <div class="acik" id="veriAcik" style="margin-top:10px"><b>Örnek veri:</b> 30 üniversite öğrencisinin bir günlük akıllı telefon ekran süresi (dakika).</div>
+        <p class="acik" style="margin-bottom:4px">…ya da değerleri elle girin (virgül, boşluk veya satırla ayırın; ondalık için nokta kullanın):</p>
+        <textarea id="elleVeri" style="min-height:80px"></textarea>
+        <button class="btn kirmizi tam" id="raporBtn" style="margin-top:8px">⟳ İSTATİSTİK RAPORUNU ÇALIŞTIR</button>
+        <button class="btn tam" id="ornekBtn" style="margin-top:6px">Örnek Veriye Dön</button>
+      </div>
+      <div class="kart">
+        <p class="kb">▤ Betimsel İstatistikler</p>
+        <div class="istat-izgara" id="istatlar"></div>
+        <div class="not mavi" id="yorum" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <section class="kart" style="margin-top:22px">
+      <div class="grafik-ust" style="margin-bottom:0">
+        <div class="grafik-sekme" id="gSekme">
+          <button class="aktif" data-g="hist">HİSTOGRAM</button><button data-g="nokta">NOKTA GRAFİĞİ</button><button data-g="kutu">KUTU GRAFİĞİ</button><button data-g="govde">GÖVDE-YAPRAK</button>
+        </div>
+        <div class="btn-grup" style="flex:0 0 auto"><button class="btn" id="pngBtn">⤓ PNG</button><button class="btn" data-tuval="tuval1" id="tam1">⤢ Tam Ekran</button></div>
+      </div>
+      <div id="sinifAlan" style="max-width:420px;margin:6px 0 10px"><div class="bas"><span class="acik" style="margin:0">Sınıf genişliği</span><span class="rozet r-gri" id="genR">10</span></div><input type="range" id="genislik" min="2" max="30" step="1" value="10"></div>
+      <div class="tuval" id="tuval1"><svg id="svg1" viewBox="0 0 900 380"></svg><div id="govdeAlan" class="govde gizli"></div></div>
+    </section>
+  </section>
+
+  <!-- ============ SEKME 2 ============ -->
+  <section class="panel" id="p2">
+    <div class="izgara" style="grid-template-columns:260px 1fr">
+      <div class="yigin">
+        <div class="kart sekil">
+          <p class="kb">⇄ Şekil Denetimleri</p>
+          <button class="btn aktif" data-sk="simetrik">↔️ Simetrik</button>
+          <button class="btn" data-sk="sol">⬅️ Sola Çarpık</button>
+          <button class="btn" data-sk="sag">➡️ Sağa Çarpık</button>
+          <button class="btn" data-sk="tek">⛰️ Tek Tepeli (sivri)</button>
+          <button class="btn" data-sk="iki">🐫 İki Tepeli</button>
+          <button class="btn" data-sk="cok">🌋 Çok Tepeli</button>
+          <button class="btn" data-sk="tekduze">➖ Tekdüze</button>
+          <div class="ayrac"></div>
+          <div class="bas"><span class="kb" style="margin:0">Örneklem: <span id="nR">150</span></span></div>
+          <input type="range" id="nLab" min="50" max="1000" step="50" value="150">
+          <button class="btn birincil tam" id="yeniden" style="margin-top:8px">Yeniden Örnekle</button>
+          <label class="onay" style="margin-top:10px"><input type="checkbox" id="kutuGoster" checked>Kutu grafiğini de göster</label>
+        </div>
+        <div class="metrik-kart"><p class="kb">💡 İçgörü</p><div id="icgoru" style="font-size:13px;line-height:1.5"></div></div>
+      </div>
+      <div class="kart">
+        <div class="grafik-ust">
+          <h2>↗ Dağılım Gezgini</h2>
+          <div class="lejant"><span><i style="background:#c8202e"></i>ORTALAMA: <b id="lOrt"></b></span><span><i style="background:#0b4a8b"></i>MEDYAN: <b id="lMed"></b></span></div>
+        </div>
+        <div class="tuval" id="tuval2"><button class="buyut" data-tuval="tuval2"></button><svg id="svg2" viewBox="0 0 900 430"></svg></div>
+        <div class="izgara-3" style="margin-top:14px">
+          <div class="gosterge" style="text-align:center"><div class="e">Çarpıklık ilişkisi</div><div class="d" id="carpik" style="font-size:16px;font-family:inherit"></div></div>
+          <div class="gosterge" style="text-align:center"><div class="e">Yayılım (SS)</div><div class="d" id="ssLab"></div></div>
+          <div class="gosterge" style="text-align:center"><div class="e">Örneklem sayısı</div><div class="d" id="nLabD"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 04 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  const ORNEK = [45, 52, 61, 65, 68, 72, 74, 75, 78, 80, 81, 82, 83, 85, 86, 88, 89, 90, 91, 92, 94, 95, 97, 98, 100, 102, 105, 110, 112, 115];
+  let veri = ORNEK.slice(), grafik = 'hist', yuklu = null;
+
+  // ================= SEKME 1 =================
+  function rapor() {
+    if (veri.length < 2) { alert('En az iki sayısal değer gerekli.'); return; }
+    const o = I.ozet5(veri);
+    const k = [['n', o.n, 0], ['Ortalama', o.ort, 2], ['Std. sapma', o.sd, 2], ['Medyan', o.med, 2], ['Minimum', o.min, 2], ['Q1', o.q1, 2], ['Q3', o.q3, 2], ['Maksimum', o.max, 2]];
+    $('istatlar').innerHTML = k.map(([a, v, d]) => `<div class="gosterge"><div class="e">${a}</div><div class="d">${Number.isInteger(v) && d ? f(v, 0) : f(v, d)}</div></div>`).join('');
+    const fark = o.ort - o.med, esik = o.sd * .1;
+    const sekil = fark > esik ? 'sağa çarpık (ortalama > medyan)' : fark < -esik ? 'sola çarpık (ortalama < medyan)' : 'yaklaşık simetrik (ortalama ≈ medyan)';
+    $('yorum').innerHTML = `<b>Yorum:</b> Dağılım <b>${sekil}</b>. Merkezin dirençli ölçüsü medyan = ${f(o.med, 2)}; yayılımın dirençli ölçüsü IQR = Q3 − Q1 = ${f(o.iqr, 2)}. ` +
+      (o.aykiri.length ? `1,5×IQR kuralına göre <b>${o.aykiri.length} aykırı değer</b> var: ${o.aykiri.map(v => f(v, 1)).join('; ')}.` : '1,5×IQR kuralına göre aykırı değer yok.');
+    const aralik = o.max - o.min; const g = $('genislik');
+    g.min = Math.max(aralik / 40, 0.01).toPrecision(2); g.max = (aralik / 2).toPrecision(2); g.step = (aralik / 200).toPrecision(2);
+    const onerilen = I.tikler(o.min, o.max, 8); const ad = onerilen[1] - onerilen[0];
+    g.value = ad; $('genR').textContent = f(+g.value, I.ondalik(onerilen));
+    ciz1();
+  }
+  function ciz1() {
+    const svg = $('svg1'); svg.innerHTML = ''; const o = I.ozet5(veri);
+    $('govdeAlan').classList.toggle('gizli', grafik !== 'govde'); svg.classList.toggle('gizli', grafik === 'govde');
+    $('sinifAlan').style.display = grafik === 'hist' ? '' : 'none';
+    const W = 900, H = 380, L = 60, R = 24, T = 20, B = 54;
+    if (grafik === 'hist') {
+      const g = +$('genislik').value; const bas = Math.floor(o.min / g) * g; const k = Math.max(1, Math.ceil((o.max - bas) / g + 1e-9) + (((o.max - bas) % g) === 0 ? 1 : 0));
+      const kutu = new Array(k).fill(0); veri.forEach(v => kutu[Math.min(k - 1, Math.floor((v - bas) / g))]++);
+      const yt = I.tiklerKapsa(0, Math.max(...kutu) * 1.1, 5), y = I.olcek(0, yt[yt.length - 1], H - B, T), x = I.olcek(bas, bas + k * g, L, W - R);
+      const xt = []; for (let i = 0; i <= k; i++) xt.push(bas + i * g);
+      I.eksenler(svg, {W, H, L, R, T, B, x, y, xt: k > 20 ? xt.filter((_, i) => i % 2 === 0) : xt, yt, xEt: yuklu || 'Değer aralığı', yEt: 'Frekans'});
+      kutu.forEach((c, i) => { const r = el('rect', {x: x(bas + i * g) + 1, y: y(c), width: x(bas + g) - x(bas) - 2, height: y(0) - y(c), fill: '#0b4a8b'}, svg);
+        el('title', {}, r, `[${f(bas + i * g, 2)}, ${f(bas + (i + 1) * g, 2)}): ${c}`);
+        if (c) el('text', {x: x(bas + (i + .5) * g), y: y(c) - 5, 'text-anchor': 'middle', 'font-size': 11, fill: '#444'}, svg, c); });
+    } else if (grafik === 'nokta') {
+      const xt = I.tiklerKapsa(o.min, o.max, 8), x = I.olcek(xt[0], xt[xt.length - 1], L, W - R);
+      const say = {}; const sirali = veri.slice().sort((a, b) => a - b);
+      const birim = (xt[xt.length - 1] - xt[0]) / 120;
+      const r = Math.min(7, (H - T - B) / (2 * Math.max(...Object.values(sirali.reduce((m, v) => (m[Math.round(v / birim)] = (m[Math.round(v / birim)] || 0) + 1, m), {}))) + 2));
+      I.eksenler(svg, {W, H, L, R, T, B, x, y: v => v, xt, yt: [], xEt: yuklu || 'Değişken değeri', yEksen: false, izgara: false});
+      sirali.forEach(v => { const kk = Math.round(v / birim); say[kk] = (say[kk] || 0) + 1;
+        el('circle', {cx: x(v), cy: H - B - r - (say[kk] - 1) * (2 * r + 1) - 2, r, fill: '#0b4a8b', 'fill-opacity': .85}, svg); });
+    } else if (grafik === 'kutu') {
+      const xt = I.tiklerKapsa(o.min, o.max, 8), x = I.olcek(xt[0], xt[xt.length - 1], L, W - R), cy = (T + H - B) / 2, h = 70;
+      I.eksenler(svg, {W, H, L, R, T, B, x, y: v => v, xt, yt: [], xEt: yuklu || 'Değişken değeri', yEksen: false, izgara: false});
+      el('line', {x1: x(o.bigMin), x2: x(o.q1), y1: cy, y2: cy, stroke: '#333', 'stroke-width': 1.5}, svg);
+      el('line', {x1: x(o.q3), x2: x(o.bigMax), y1: cy, y2: cy, stroke: '#333', 'stroke-width': 1.5}, svg);
+      [o.bigMin, o.bigMax].forEach(v => el('line', {x1: x(v), x2: x(v), y1: cy - h / 4, y2: cy + h / 4, stroke: '#333', 'stroke-width': 1.5}, svg));
+      el('rect', {x: x(o.q1), y: cy - h / 2, width: x(o.q3) - x(o.q1), height: h, fill: '#dbe7f6', stroke: '#0b4a8b', 'stroke-width': 2}, svg);
+      el('line', {x1: x(o.med), x2: x(o.med), y1: cy - h / 2, y2: cy + h / 2, stroke: '#c8202e', 'stroke-width': 3}, svg);
+      el('path', {d: `M${x(o.ort)},${cy + h / 2 + 8} l-6,10 h12 z`, fill: '#14966f'}, svg);
+      o.aykiri.forEach(v => el('circle', {cx: x(v), cy, r: 5, fill: 'none', stroke: '#c8202e', 'stroke-width': 2}, svg));
+      [['Min*', o.bigMin], ['Q1', o.q1], ['Medyan', o.med], ['Q3', o.q3], ['Maks*', o.bigMax]].forEach(([a, v], i) =>
+        el('text', {x: x(v), y: cy - h / 2 - 10 - (i % 2) * 14, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 700, fill: '#333'}, svg, `${a} = ${f(v, 1)}`));
+      el('text', {x: L, y: H - 4, 'font-size': 11, fill: '#666'}, svg, '* Bıyıklar 1,5×IQR sınırları içindeki en uç değerlere uzanır · ▲ ortalama · ○ aykırı değer');
+    } else {
+      const tam = veri.every(v => Number.isInteger(v)); const carp = tam ? 1 : 10;
+      const sv = veri.map(v => Math.round(v * carp)).sort((a, b) => a - b);
+      const govdeler = {}; sv.forEach(v => { const s = Math.floor(v / 10); (govdeler[s] = govdeler[s] || []).push(Math.abs(v % 10)); });
+      const ks = Object.keys(govdeler).map(Number); let html = '';
+      for (let s = Math.min(...ks); s <= Math.max(...ks); s++) html += `<div><span class="s">${s}</span>${(govdeler[s] || []).join(' ')}</div>`;
+      $('govdeAlan').innerHTML = html + `<div class="ipucu-k" style="margin-top:10px;font-family:inherit">Anahtar: ${ks[0]} | ${govdeler[ks[0]][0]} = ${tam ? ks[0] * 10 + govdeler[ks[0]][0] : f((ks[0] * 10 + govdeler[ks[0]][0]) / 10, 1)}</div>`;
+    }
+  }
+  document.querySelectorAll('#gSekme button').forEach(b => b.addEventListener('click', () => { grafik = b.dataset.g; document.querySelectorAll('#gSekme button').forEach(x => x.classList.toggle('aktif', x === b)); ciz1(); }));
+  $('genislik').addEventListener('input', () => { $('genR').textContent = f(+$('genislik').value, 2); ciz1(); });
+  $('raporBtn').addEventListener('click', () => {
+    const m = $('elleVeri').value.trim();
+    if (m) { const v = m.split(/[\s;,]+/).map(x => x.trim()).filter(x => x !== '' && isFinite(+x)).map(Number);
+      if (v.length >= 2) { veri = v; yuklu = null; $('veriAcik').innerHTML = `<b>Elle girilen veri:</b> ${v.length} değer.`; } }
+    rapor();
+  });
+  $('ornekBtn').addEventListener('click', () => { veri = ORNEK.slice(); yuklu = null; $('elleVeri').value = ORNEK.join(', '); $('kolonAlan').classList.add('gizli');
+    $('veriAcik').innerHTML = '<b>Örnek veri:</b> 30 üniversite öğrencisinin bir günlük akıllı telefon ekran süresi (dakika).'; rapor(); });
+  let dosyaVeri = null;
+  I.birakmaAlani($('birak'), $('dosya'), async dosya => {
+    try { const d = await I.dosyaOku(dosya); if (!d.sayisal.length) throw new Error('Sayısal sütun bulunamadı.');
+      dosyaVeri = d; $('kolonSec').innerHTML = d.sayisal.map(k => `<option>${k}</option>`).join(''); $('kolonAlan').classList.remove('gizli');
+      kolonYukle(d.sayisal[0], dosya.name);
+    } catch (e) { alert('Dosya okunamadı: ' + e.message); }
+  });
+  function kolonYukle(k, ad) { veri = dosyaVeri.veri.map(r => r[k]).filter(v => v != null && isFinite(v)); yuklu = k; $('elleVeri').value = '';
+    $('veriAcik').innerHTML = `<b>Yüklenen dosya${ad ? ' (' + ad + ')' : ''}:</b> “${k}” değişkeni, ${veri.length} geçerli değer.`; rapor(); }
+  $('kolonSec').addEventListener('change', e => kolonYukle(e.target.value));
+  $('pngBtn').addEventListener('click', () => grafik !== 'govde' && I.svgIndir($('svg1'), 'sayisal-' + grafik, 'png'));
+  $('tam1').addEventListener('click', () => { const t = $('tuval1'); document.fullscreenElement ? document.exitFullscreen() : t.requestFullscreen && t.requestFullscreen(); });
+  $('elleVeri').value = ORNEK.join(', ');
+  rapor();
+
+  // ================= SEKME 2 =================
+  const SEKIL = {
+    simetrik: {u: () => 50 + 10 * I.rnorm(), m: 'Tam simetrik bir dağılımda <b>ortalama ve medyan eşittir</b>. Değerler merkezin iki yanına aynı biçimde yayılır.'},
+    sol: {u: () => 100 * I.rbeta(5, 1.6), m: 'Sola çarpık dağılımda uzun kuyruk <b>soldadır</b>. Küçük uç değerler ortalamayı aşağı çeker: <b>ortalama < medyan</b>. (Örnek: kolay bir sınavın puanları.)'},
+    sag: {u: () => 100 * I.rbeta(1.6, 5), m: 'Sağa çarpık dağılımda uzun kuyruk <b>sağdadır</b>. Büyük uç değerler ortalamayı yukarı çeker: <b>ortalama > medyan</b>. (Örnek: gelir dağılımı.)'},
+    tek: {u: () => 50 + 5 * I.rnorm(), m: 'Tek tepeli, sivri bir dağılım: değerler merkez çevresinde yoğunlaşır, <b>standart sapma küçüktür</b>.'},
+    iki: {u: () => (Math.random() < .5 ? 30 : 70) + 7 * I.rnorm(), m: 'İki tepeli dağılım çoğu zaman <b>iki farklı alt grubun</b> karıştığını gösterir. Ortalama ve medyan, gözlemlerin az olduğu "vadiye" düşebilir — tek bir merkez ölçüsü yanıltıcıdır!'},
+    cok: {u: () => [20, 50, 80][Math.floor(Math.random() * 3)] + 5 * I.rnorm(), m: 'Çok tepeli dağılımlar birden çok alt grubu işaret eder. Veriyi gruplara ayırıp ayrı ayrı incelemek gerekir.'},
+    tekduze: {u: () => 100 * Math.random(), m: 'Tekdüze dağılımda tüm aralıklar yaklaşık eşit sıklıktadır; belirgin bir tepe yoktur. Ortalama ≈ medyan, ama yayılım büyüktür.'}
+  };
+  let sekil = 'simetrik', lab = [];
+  function uret() { const n = +$('nLab').value; lab = []; while (lab.length < n) { const v = SEKIL[sekil].u(); if (v >= 0 && v <= 100) lab.push(v); } ciz2(); }
+  function ciz2() {
+    const svg = $('svg2'); svg.innerHTML = ''; const W = 900, H = 430, L = 54, R = 24, T = 20, B = 50;
+    const kutuVar = $('kutuGoster').checked, altH = kutuVar ? 70 : 0;
+    const g = 5, kutu = new Array(20).fill(0); lab.forEach(v => kutu[Math.min(19, Math.floor(v / g))]++);
+    const x = I.olcek(0, 100, L, W - R); const yt = I.tiklerKapsa(0, Math.max(...kutu) * 1.1, 5); const y = I.olcek(0, yt[yt.length - 1], H - B - altH, T);
+    I.eksenler(svg, {W, H: H - altH, L, R, T, B, x, y, xt: [0, 25, 50, 75, 100], yt, xEt: '', yEt: 'Frekans'});
+    el('text', {x: (L + W - R) / 2, y: H - 8, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#444'}, svg, 'Değer aralığı (0–100)');
+    kutu.forEach((c, i) => el('rect', {x: x(i * g) + 1, y: y(c), width: x(g) - x(0) - 2, height: y(0) - y(c), fill: '#e5e7eb', stroke: '#c7cbd1'}, svg));
+    const o = I.ozet5(lab);
+    el('line', {x1: x(o.ort), x2: x(o.ort), y1: T, y2: y(0), stroke: '#c8202e', 'stroke-width': 3}, svg);
+    el('line', {x1: x(o.med), x2: x(o.med), y1: T, y2: y(0), stroke: '#0b4a8b', 'stroke-width': 3, 'stroke-dasharray': '6 4'}, svg);
+    if (kutuVar) { const cy = H - B - altH / 2 + 18, h = 28;
+      el('line', {x1: x(o.bigMin), x2: x(o.bigMax), y1: cy, y2: cy, stroke: '#555'}, svg);
+      el('rect', {x: x(o.q1), y: cy - h / 2, width: x(o.q3) - x(o.q1), height: h, fill: '#dbe7f6', stroke: '#0b4a8b', 'stroke-width': 1.5}, svg);
+      el('line', {x1: x(o.med), x2: x(o.med), y1: cy - h / 2, y2: cy + h / 2, stroke: '#0b4a8b', 'stroke-width': 3}, svg);
+      o.aykiri.forEach(v => el('circle', {cx: x(v), cy, r: 3, fill: 'none', stroke: '#c8202e'}, svg)); }
+    $('lOrt').textContent = f(o.ort, 1); $('lMed').textContent = f(o.med, 1);
+    const fark = o.ort - o.med;
+    $('carpik').textContent = fark > 1.2 ? 'Sağa çarpık (ort. > med.)' : fark < -1.2 ? 'Sola çarpık (ort. < med.)' : 'Yaklaşık simetrik';
+    $('ssLab').textContent = f(o.sd, 2); $('nLabD').textContent = lab.length;
+    $('icgoru').innerHTML = SEKIL[sekil].m;
+  }
+  document.querySelectorAll('[data-sk]').forEach(b => b.addEventListener('click', () => { sekil = b.dataset.sk; document.querySelectorAll('[data-sk]').forEach(x => x.classList.toggle('aktif', x === b)); uret(); }));
+  $('nLab').addEventListener('input', () => { $('nR').textContent = $('nLab').value; uret(); });
+  $('yeniden').addEventListener('click', uret);
+  $('kutuGoster').addEventListener('change', ciz2);
+  uret();
+})();
+</script>
+</body>
+</html>

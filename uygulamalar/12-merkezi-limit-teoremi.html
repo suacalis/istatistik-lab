@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merkezi Limit Teoremi ve Student t · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .ana{display:grid;grid-template-columns:330px 1fr;gap:22px;align-items:start}
+  @media (max-width:980px){.ana{grid-template-columns:1fr}}
+  .sec-kart{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:1px solid var(--kenar);background:#fff;border-radius:10px;padding:11px 13px;margin-bottom:8px;cursor:pointer;font-family:inherit}
+  .sec-kart b{display:block;font-size:13.5px}
+  .sec-kart span{font-family:var(--mono);font-size:11px;color:var(--soluk)}
+  .sec-kart i{width:16px;height:16px;border-radius:50%;border:2px solid #bbb;flex:none}
+  .sec-kart.aktif{border-color:var(--kirmizi);background:var(--kirmizi-acik)}
+  .sec-kart.aktif i{border:5px solid var(--kirmizi)}
+  .kar-izgara{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .kar-izgara .k{background:#fff;border:1px solid var(--kenar);border-radius:10px;padding:10px}
+  .kar-izgara .k .e{font-size:11.5px;font-weight:700;color:var(--soluk)}
+  .kar-izgara .k .d{font-family:var(--mono);font-size:20px;font-weight:800;color:var(--mavi)}
+  .baslik-cizgi{border-left:4px solid var(--kirmizi);padding-left:10px;font-family:var(--serif);color:var(--mavi);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.03em}
+  .gecis{border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.55}
+  .buyuk-n{font-family:var(--serif);font-size:34px;font-weight:700;color:var(--mavi)}
+  .kiyas .satir{align-items:center}
+  .kiyas .satir b{text-align:right;line-height:1.3}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Merkezi Limit Teoremi ve Student t</h1></a>
+  <div class="sag-ust">
+    <nav class="sekmeler"><button class="sekme aktif" data-hedef="p1">Sekme 1: MLT</button><button class="sekme" data-hedef="p2">Sekme 2: Z ve t</button></nav>
+    <a class="geri" href="../index.html">← Tüm Uygulamalar</a>
+  </div>
+</header>
+
+<main class="icerik">
+  <!-- ============ SEKME 1 ============ -->
+  <section class="panel aktif" id="p1">
+    <div class="ana">
+      <aside class="yigin">
+        <section class="kart">
+          <p class="kb">⫼ Simülasyon Parametreleri</p>
+          <p class="acik">Ana popülasyonu ayarlayın ve örneklem ortalamasının örnekleme dağılımının farklı örneklem büyüklüklerinde nasıl değiştiğini izleyin.</p>
+          <p style="font-weight:700;font-size:13px;margin:12px 0 8px">1. Ana popülasyonun şekli</p>
+          <button class="sec-kart" data-p="normal"><div><b>Simetrik (Normal)</b><span>Çan biçimi: μ=50, σ=12</span></div><i></i></button>
+          <button class="sec-kart aktif" data-p="carpik"><div><b>Aşırı çarpık</b><span>Sağa çarpık Beta: μ=23,1, σ=15,4</span></div><i></i></button>
+          <button class="sec-kart" data-p="iki"><div><b>İki tepeli dağılım</b><span>Çift tepeli karışım: μ=60, σ=31,6</span></div><i></i></button>
+          <div class="bas" style="margin-top:14px"><span style="font-weight:700;font-size:13px">2. Örneklem büyüklüğü (n)</span><span class="rozet r-mavi" id="nR">n = 5</span></div>
+          <input type="range" class="ac-kirmizi" id="n" min="2" max="100" step="1" value="5">
+          <div class="olcek"><span>n = 2<br>(çok küçük)</span><span style="color:var(--kirmizi)">n = 30 (MLT)</span><span>n = 100<br>(büyük)</span></div>
+          <div class="bas" style="margin-top:12px"><span style="font-weight:700;font-size:13px">Simülasyon sayısı (k)</span>
+            <select id="k" style="width:110px"><option>500</option><option selected>1000</option><option>5000</option></select></div>
+        </section>
+        <section class="kart" style="background:#f7f7f6">
+          <p class="kb" style="font-family:var(--serif);font-size:15px">Kuramsal ve Gözlenen İstatistikler</p>
+          <div class="kar-izgara">
+            <div class="k"><div class="e">Gerçek ortalama (μ)</div><div class="d" id="gMu"></div></div>
+            <div class="k"><div class="e">Gerçek SH (σ/√n)</div><div class="d" id="gSe"></div></div>
+            <div class="k"><div class="e">Simülasyon ort. (x̄'lerin ort.)</div><div class="d" id="sMu"></div></div>
+            <div class="k"><div class="e">Simülasyon SS (s<sub>x̄</sub>)</div><div class="d" id="sSe"></div></div>
+          </div>
+          <button class="btn kirmizi tam" id="cek" style="margin-top:12px">↻ Yeniden Çek (k = 1000)</button>
+        </section>
+      </aside>
+      <div class="yigin">
+        <section class="kart">
+          <div class="grafik-ust"><div class="baslik-cizgi">Ana Popülasyon Dağılımı (OYF)</div><span class="rozet r-gri">Tek tek gözlemlerin (y) dağılımı</span></div>
+          <div class="tuval"><svg id="svgP" viewBox="0 0 900 240"></svg></div>
+        </section>
+        <section class="kart">
+          <div class="grafik-ust"><div><div class="baslik-cizgi">Örneklem Ortalamasının (ȳ) Örnekleme Dağılımı</div><div class="acik" id="hAcik">Simüle edilen örneklem ortalamalarının (ȳ) frekans histogramı</div></div><span class="rozet r-yesil" id="kR">Simülasyon (k) = 1.000</span></div>
+          <div class="tuval" id="tuvalS"><button class="buyut" data-tuval="tuvalS"></button><svg id="svgS" viewBox="0 0 900 300"></svg></div>
+          <div class="lejant" style="margin-top:8px"><span><i class="cizgi" style="background:#0b4a8b"></i>Kuramsal MLT modeli N(μ, σ/√n)</span><span><i style="background:#c8202e;border-radius:2px"></i>Simüle edilen ortalamalar (ȳ)</span><span><i class="cizgi" style="background:#d97706"></i>Ana popülasyon (karşılaştırma için, ölçekli)</span></div>
+        </section>
+        <div class="gecis" id="gecis"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEKME 2 ============ -->
+  <section class="panel" id="p2">
+    <div class="ana">
+      <aside class="yigin">
+        <section class="kart">
+          <p class="kb" style="font-family:var(--serif);font-size:15px">∿ t-Dağılımı Ayarları</p>
+          <p class="acik">Serbestlik derecesi (sd) kaydırıcısını sürükleyerek Student t eğrisinin standart normal Z eğrisine dönüşmesini izleyin.</p>
+          <div class="bas"><span style="font-weight:700;font-size:13px">Serbestlik derecesi (sd)</span><span class="rozet r-kirmizi" id="dfR">sd = 3</span></div>
+          <input type="range" class="ac-kirmizi" id="df" min="1" max="30" step="1" value="3">
+          <div class="olcek"><span>sd = 1<br>(kalın kuyruk)</span><span style="color:var(--kirmizi)">sd = 10 (orta)</span><span>sd = 30<br>(neredeyse normal)</span></div>
+          <div class="ayrac"></div>
+          <p class="acik" style="margin:0">KARŞILIK GELEN ÖRNEKLEM BÜYÜKLÜĞÜ</p>
+          <div><span class="buyuk-n" id="nEsd">n = 4</span> <span class="ipucu-k" id="nEsdA">(3 sd + 1)</span></div>
+        </section>
+        <section class="kart kiyas">
+          <p class="kb" style="font-family:var(--serif);font-size:15px">Matematiksel Karşılaştırma</p>
+          <div class="satir"><span>Uç değer olasılığı<br>(|değer| > 2,0 SS)</span><b><span style="color:var(--mavi)">Z: <span id="zUc"></span></span><br><span style="color:var(--kirmizi)">t: <span id="tUc"></span></span></b></div>
+          <div class="ayrac"></div>
+          <div class="satir"><span>Merkezdeki tepe yüksekliği<br>(t = 0)</span><b><span style="color:var(--mavi)">Z: <span id="zTepe"></span></span><br><span style="color:var(--kirmizi)">t: <span id="tTepe"></span></span></b></div>
+          <div class="ayrac"></div>
+          <div class="satir"><span>%95 güven için<br>kritik değer</span><b><span style="color:var(--mavi)">z*: 1,960</span><br><span style="color:var(--kirmizi)">t*: <span id="tKrit"></span></span></b></div>
+          <div class="not turuncu" id="tUyari" style="margin-top:10px;font-size:12.5px"></div>
+        </section>
+      </aside>
+      <div class="yigin">
+        <section class="kart">
+          <div class="baslik-cizgi">Standart Normal Z ile Student t Dağılımı</div>
+          <p class="acik">Serbestlik derecesi 30'a yükseldikçe düz kırmızı eğrinin (Student t: dikey olarak basık, kuyrukları kalın) yükselip kesikli mavi eğriyle (standart normal Z) örtüştüğünü gözlemleyin.</p>
+          <div class="tuval" id="tuvalT"><button class="buyut" data-tuval="tuvalT"></button><svg id="svgT" viewBox="0 0 900 400"></svg></div>
+        </section>
+        <div class="not turuncu" style="display:flex;gap:12px"><span style="font-size:20px">💡</span><div><b style="letter-spacing:.08em;font-size:12px">SINIF LABORATUVARI İÇGÖRÜSÜ:</b><br>William Sealy Gosset, t-dağılımını 1908'de Dublin'deki Guinness Bira Fabrikası'nda kimyager olarak çalışırken <b>"Student"</b> takma adıyla yayımladı. Örneklem küçük olduğunda (n &lt; 30) örneklem tahmini s çok değişken olduğu için, geleneksel normal güven aralıklarının gerçek parametreyi gereğinden az yakaladığını (düşük kapsama) keşfetti. Student t eğrisi hata paylarını genişleterek güvenilir performansı garanti eder.</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 12 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  const XM = 120;
+  const A = 1.625, Bb = 6.82, lB = I.lgamma(A) + I.lgamma(Bb) - I.lgamma(A + Bb);
+  const POP = {
+    normal: {mu: 50, sd: 12, u: () => 50 + 12 * I.rnorm(), pdf: x => I.phi((x - 50) / 12) / 12},
+    carpik: {mu: XM * A / (A + Bb), sd: XM * Math.sqrt(A * Bb / ((A + Bb) ** 2 * (A + Bb + 1))), u: () => XM * I.rbeta(A, Bb), pdf: x => { const t = x / XM; return t <= 0 || t >= 1 ? 0 : Math.exp((A - 1) * Math.log(t) + (Bb - 1) * Math.log(1 - t) - lB) / XM; }},
+    iki: {mu: 60, sd: Math.sqrt(1000), u: () => (Math.random() < .5 ? 30 : 90) + 10 * I.rnorm(), pdf: x => .5 * I.phi((x - 30) / 10) / 10 + .5 * I.phi((x - 90) / 10) / 10}
+  };
+  let pop = 'carpik', ort = [];
+  function simule() { const n = +$('n').value, k = +$('k').value, P = POP[pop]; ort = [];
+    for (let j = 0; j < k; j++) { let s = 0; for (let i = 0; i < n; i++) s += P.u(); ort.push(s / n); } ciz(); }
+  function ciz() {
+    const n = +$('n').value, P = POP[pop], se = P.sd / Math.sqrt(n);
+    $('nR').textContent = 'n = ' + n; $('kR').textContent = 'Simülasyon (k) = ' + (+$('k').value).toLocaleString('tr-TR'); $('cek').textContent = `↻ Yeniden Çek (k = ${(+$('k').value).toLocaleString('tr-TR')})`;
+    $('gMu').textContent = f(P.mu, 2); $('gSe').textContent = f(se, 2); $('sMu').textContent = f(I.ort(ort), 2); $('sSe').textContent = f(I.sd(ort), 2);
+    // ana popülasyon
+    let svg = $('svgP'); svg.innerHTML = ''; let W = 900, H = 240, L = 30, R = 20, T = 30, B = 34;
+    const x = I.olcek(0, XM, L, W - R); let mx = 0; for (let v = 0; v <= XM; v += .5) mx = Math.max(mx, P.pdf(v)); let y = I.olcek(0, mx * 1.1, H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y, xt: [0, 20, 40, 60, 80, 100, 120], yt: [], yEksen: false, izgara: false});
+    let d = `M${x(0)},${y(0)}`; for (let v = 0; v <= XM; v += .5) d += ` L${x(v)},${y(P.pdf(v))}`; d += ` L${x(XM)},${y(0)} Z`;
+    const grad = el('linearGradient', {id: 'gr', x1: 0, x2: 0, y1: 0, y2: 1}, el('defs', {}, svg)); el('stop', {offset: 0, 'stop-color': '#c8202e', 'stop-opacity': .35}, grad); el('stop', {offset: 1, 'stop-color': '#c8202e', 'stop-opacity': .02}, grad);
+    el('path', {d, fill: 'url(#gr)', stroke: '#c8202e', 'stroke-width': 2.4}, svg);
+    el('line', {x1: x(P.mu), x2: x(P.mu), y1: T - 6, y2: y(0), stroke: '#1d2433', 'stroke-dasharray': '4 3'}, svg); I.etiket(svg, x(P.mu), T - 26, 'μ = ' + f(P.mu, 1), '#1d2433');
+    // örnekleme dağılımı
+    svg = $('svgS'); svg.innerHTML = ''; H = 300; T = 16; B = 34;
+    const g = Math.max(.5, Math.min(4, se / 3)), kk = Math.ceil(XM / g), kutu = new Array(kk).fill(0); ort.forEach(v => { const i = Math.floor(v / g); if (i >= 0 && i < kk) kutu[i]++; });
+    const yo = c => c / (ort.length * g), tepe = Math.max(Math.max(...kutu.map(yo)), 1 / (se * Math.sqrt(2 * Math.PI)));
+    y = I.olcek(0, tepe * 1.1, H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y, xt: [0, 20, 40, 60, 80, 100, 120], yt: [], yEksen: false, izgara: false});
+    // ana popülasyon gölgesi (ölçekli)
+    let dp = ''; for (let v = 0; v <= XM; v += .5) dp += (dp ? ' L' : 'M') + x(v) + ',' + y(P.pdf(v) / mx * tepe * .35); el('path', {d: dp, fill: 'none', stroke: '#d97706', 'stroke-width': 1.5, 'stroke-dasharray': '3 3', opacity: .7}, svg);
+    kutu.forEach((c, i) => c && el('rect', {x: x(i * g) + .3, y: y(yo(c)), width: Math.max(.5, x(g) - x(0) - .6), height: y(0) - y(yo(c)), fill: '#c8202e', 'fill-opacity': .78}, svg));
+    let dn = ''; for (let v = Math.max(0, P.mu - 5 * se); v <= Math.min(XM, P.mu + 5 * se); v += se / 20) dn += (dn ? ' L' : 'M') + x(v) + ',' + y(I.phi((v - P.mu) / se) / se);
+    el('path', {d: dn, fill: 'none', stroke: '#0b4a8b', 'stroke-width': 2.6, 'stroke-dasharray': '7 4'}, svg);
+    // geçiş mesajı
+    const cp = I.carpiklik(ort);
+    const kutu2 = $('gecis');
+    if (pop === 'normal') { kutu2.style.background = 'var(--yesil-acik)'; kutu2.innerHTML = `<b>ⓘ NORMAL ANA POPÜLASYON (n = ${n})</b><br>Ana popülasyon zaten normal olduğundan, örneklem ortalamaları <b>her n için</b> tam olarak normal dağılır. n büyüdükçe yalnızca yayılım (σ/√n) küçülür.`; }
+    else if (n < 30) { kutu2.style.background = 'var(--kirmizi-acik)'; kutu2.innerHTML = `<b style="color:var(--kirmizi)">ⓘ MLT GEÇİŞ AŞAMASINDA (n = ${n})</b><br>Çok küçük bir örneklem büyüklüğü (n = ${n}) ve ${pop === 'carpik' ? 'çarpık' : 'iki tepeli'} bir ana popülasyonla örnekleme dağılımının şekli <b>henüz tam simetrik değil</b> (çarpıklık ≈ ${f(cp, 2)}). Hâlâ ana popülasyonun izlerini taşıyor. Merkezi Limit Teoremi'nin devreye girdiğini görmek için kaydırıcıyı <b>n ≥ 30</b>'a sürükleyin!`; }
+    else { kutu2.style.background = 'var(--yesil-acik)'; kutu2.innerHTML = `<b style="color:var(--yesil)">✓ MERKEZİ LİMİT TEOREMİ DEVREDE (n = ${n})</b><br>Ana popülasyon ${pop === 'carpik' ? 'çarpık' : 'iki tepeli'} olsa bile, örneklem ortalamalarının dağılımı artık <b>yaklaşık normal</b> (çarpıklık ≈ ${f(cp, 2)}). Merkezi μ = ${f(P.mu, 1)}, yayılımı σ/√n = ${f(se, 2)}. Bu yüzden ȳ için normal modele dayalı çıkarım yapabiliriz.`; }
+  }
+  document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { pop = b.dataset.p; document.querySelectorAll('[data-p]').forEach(x => x.classList.toggle('aktif', x === b)); simule(); }));
+  $('n').addEventListener('input', simule); $('k').addEventListener('change', simule); $('cek').addEventListener('click', simule);
+  simule();
+
+  // ============ SEKME 2 ============
+  function tCiz() {
+    const df = +$('df').value; $('dfR').textContent = 'sd = ' + df; $('nEsd').textContent = 'n = ' + (df + 1); $('nEsdA').textContent = `(${df} sd + 1)`;
+    const zU = 2 * (1 - I.Phi(2)), tU = 2 * (1 - I.tCdf(2, df));
+    $('zUc').textContent = I.yz(zU, 2); $('tUc').textContent = I.yz(tU, 2); $('zTepe').textContent = f(I.phi(0), 3); $('tTepe').textContent = f(I.tPdf(0, df), 3);
+    $('tKrit').textContent = f(I.tInv(.975, df), 3);
+    $('tUyari').innerHTML = df < 5 ? `⚠️ <b>Kalın kuyruklar:</b> Uç değer olasılığı çok yüksek (${I.yz(tU, 1)}, normalde ${I.yz(zU, 1)}). Bu durum çok daha geniş bir hata payı gerektirir!`
+      : df < 15 ? `◐ <b>Orta düzey:</b> t eğrisi normale yaklaşıyor ama kuyruklar hâlâ belirgin biçimde kalın (${I.yz(tU, 1)} ve ${I.yz(zU, 1)}).`
+      : `✓ <b>Neredeyse normal:</b> sd = ${df} için t ve Z arasındaki fark küçük (${I.yz(tU, 1)} ve ${I.yz(zU, 1)}). Yine de σ bilinmiyorsa t kullanmak doğru tercihtir.`;
+    const svg = $('svgT'); svg.innerHTML = ''; const W = 900, H = 400, L = 40, R = 30, T = 40, B = 60;
+    const x = I.olcek(-4.5, 4.5, L, W - R), y = I.olcek(0, .43, H - B, T);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y, xt: [-4, -3, -2, -1, 0, 1, 2, 3, 4], yt: [], yEksen: false, izgara: false, xBicim: v => v > 0 ? '+' + v : String(v)});
+    const yol = (fn, a, b) => { let d = `M${x(a)},${y(0)}`; for (let i = 0; i <= 150; i++) { const v = a + (b - a) * i / 150; d += ` L${x(v)},${y(fn(v))}`; } return d + ` L${x(b)},${y(0)} Z`; };
+    const tf = v => I.tPdf(v, df);
+    el('path', {d: yol(tf, -4.5, -2), fill: '#c8202e', 'fill-opacity': .22}, svg); el('path', {d: yol(tf, 2, 4.5), fill: '#c8202e', 'fill-opacity': .22}, svg);
+    [-2, 2].forEach(v => { el('line', {x1: x(v), x2: x(v), y1: T, y2: y(0), stroke: '#888', 'stroke-dasharray': '4 4'}, svg);
+      el('text', {x: x(v), y: T - 8, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#555', class: 'svg-yazi'}, svg, `t = ${v > 0 ? '+' : '−'}2,0`); });
+    const cizgi = (fn, renk, kesik) => { let d = ''; for (let i = 0; i <= 300; i++) { const v = -4.5 + 9 * i / 300; d += (i ? ' L' : 'M') + x(v) + ',' + y(fn(v)); } el('path', {d, fill: 'none', stroke: renk, 'stroke-width': 2.8, 'stroke-dasharray': kesik ? '8 5' : null}, svg); };
+    cizgi(I.phi, '#0b4a8b', true); cizgi(tf, '#c8202e');
+    el('text', {x: x(-3.3), y: y(0) - 10, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 700, fill: '#c8202e', ...I.halo}, svg, '← Fazladan uç değerler (kuyruk)');
+    el('text', {x: x(3.3), y: y(0) - 10, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 700, fill: '#c8202e', ...I.halo}, svg, 'Fazladan uç değerler (kuyruk) →');
+    [['#0b4a8b', 'Standart normal Z ~ N(0, 1)', '8 5'], ['#c8202e', `Student t (sd = ${df})`, null]].forEach(([r, t, k], i) => {
+      el('line', {x1: W - R - 230, x2: W - R - 200, y1: T + 4 + i * 22, y2: T + 4 + i * 22, stroke: r, 'stroke-width': 3, 'stroke-dasharray': k}, svg);
+      el('text', {x: W - R - 192, y: T + 8 + i * 22, 'font-size': 12, 'font-weight': 700, fill: r}, svg, t); });
+  }
+  $('df').addEventListener('input', tCiz); tCiz();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Normal Model ve Ampirik Kural · İstatistik Laboratuvarı</title>
+<link rel="stylesheet" href="../assets/ortak.css">
+<style>
+  .hesap-kart{background:var(--mavi);color:#fff;border-radius:16px;padding:20px}
+  .hesap-kart h2{color:#fff;font-family:var(--serif);margin:0 0 12px;font-size:21px}
+  .hesap-kart .btn-grup{background:rgba(255,255,255,.12);padding:4px;border-radius:10px}
+  .hesap-kart .btn-grup .btn{background:transparent;color:#fff;border:0}
+  .hesap-kart .btn-grup .btn.aktif{background:#fff;color:var(--mavi)}
+  .hesap-kart .kb{color:#a9c4e6;margin-top:14px}
+  .hesap-kart input[type=range]{accent-color:#fff}
+  .hesap-kart .olcek{color:#a9c4e6}
+  .buyuk-deger{background:rgba(255,255,255,.12);border-radius:12px;text-align:center;font-family:var(--mono);font-size:30px;font-weight:800;padding:14px;margin:10px 0}
+  .cikti{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;margin-top:6px}
+  .cikti .d{font-family:var(--serif);font-size:40px;font-weight:700}
+  .hesap-kart p{font-size:12.5px;line-height:1.5;opacity:.9}
+  .hesap-kart input[type=number]{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:var(--mono)}
+  .anahtar{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;cursor:pointer;background:#f7f7f6;border:1px solid var(--kenar);border-radius:10px;padding:10px 12px}
+  .anahtar input{display:none}
+  .anahtar .ray{width:38px;height:22px;border-radius:11px;background:#d1d5db;position:relative;transition:.2s;flex:none}
+  .anahtar .ray::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+  .anahtar input:checked + .ray{background:var(--kirmizi)}
+  .anahtar input:checked + .ray::after{left:18px}
+  .ana{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
+  @media (max-width:980px){.ana{grid-template-columns:1fr}}
+  .sayi-kutu{width:70px!important;text-align:center;font-family:var(--mono);padding:4px!important}
+</style>
+</head>
+<body>
+<header class="ust-bant">
+  <a class="logo" href="../index.html"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 7,12 10,4 14,20 17,12 22,12"/></svg></div><h1>İstatistik Laboratuvarı: Normal Model ve Ampirik Kural</h1></a>
+  <div class="sag-ust"><a class="geri" href="../index.html">← Tüm Uygulamalar</a></div>
+</header>
+
+<main class="icerik">
+  <div class="ana">
+    <div class="yigin">
+      <section class="kart">
+        <div class="grafik-ust">
+          <div><h2 style="font-size:26px">Normal Dağılım Gezgini</h2><div class="acik" style="font-style:italic">Parametreleri değiştirin ve bölgesel olasılıkları keşfedin.</div></div>
+          <div class="btn-grup" style="flex:0 0 auto"><button class="btn" id="sigdir">⤢ Eğriye yakınlaş</button><button class="btn" id="sifirla" title="Sıfırla">↺ N(0, 1)</button></div>
+        </div>
+        <div class="tuval" id="tuval"><button class="buyut" data-tuval="tuval"></button><svg id="svg" viewBox="0 0 900 400"></svg></div>
+      </section>
+      <div class="izgara-2">
+        <section class="kart">
+          <p class="kb">⚙ Model Parametreleri</p>
+          <div class="bas"><span style="font-weight:700;font-size:13.5px">Ortalama (μ)</span><input type="number" class="sayi-kutu" id="muS" step="0.5" value="0"></div>
+          <div class="kaydirici" style="margin:6px 0 14px"><button class="pm" data-k="mu" data-y="-1">−</button><input type="range" class="ac-kirmizi" id="mu" min="-20" max="20" step="0.5" value="0"><button class="pm" data-k="mu" data-y="1">+</button></div>
+          <div class="bas"><span style="font-weight:700;font-size:13.5px">Standart Sapma (σ)</span><input type="number" class="sayi-kutu" id="sigmaS" step="0.1" min="0.1" value="1"></div>
+          <div class="kaydirici" style="margin-top:6px"><button class="pm" data-k="sigma" data-y="-1">−</button><input type="range" class="ac-kirmizi" id="sigma" min="0.1" max="10" step="0.1" value="1"><button class="pm" data-k="sigma" data-y="1">+</button></div>
+          <p class="acik" style="margin-top:12px">μ eğriyi sağa-sola <b>kaydırır</b>; σ eğriyi <b>yayar ya da daraltır</b>. Eğri altındaki toplam alan her zaman 1'dir.</p>
+        </section>
+        <section class="kart">
+          <p class="kb">ⓘ Görüntü Seçenekleri</p>
+          <label class="anahtar"><span>Ampirik Kural<br><span class="ipucu-k" style="font-weight:600">68–95–99,7 BÖLGELERİNİ GÖSTER</span></span><input type="checkbox" id="ampirik"><span class="ray"></span></label>
+          <label class="anahtar" style="margin-top:8px"><span>Hesaplayıcı alanını tara</span><input type="checkbox" id="alanGoster" checked><span class="ray"></span></label>
+          <p class="acik" style="margin-top:10px"><i>İpucu: Ampirik kural normal dağılımlar için geçerlidir; verilerin neredeyse tamamı ortalamanın üç standart sapma yakınındadır.</i></p>
+          <div class="not mavi" id="ampirikAcik" style="font-size:12.5px"></div>
+        </section>
+      </div>
+    </div>
+
+    <aside class="hesap-kart">
+      <h2>▦ Hesaplayıcı</h2>
+      <div class="btn-grup" id="modSec"><button class="btn aktif" data-m="z">Z → %</button><button class="btn" data-m="p">% → Z</button><button class="btn" data-m="ara">a &lt; X &lt; b</button></div>
+      <div id="mZ">
+        <p class="kb">GİRDİ: Z-PUANI</p>
+        <input type="range" id="zIn" min="-4" max="4" step="0.01" value="0"><div class="olcek"><span>−4</span><span>0</span><span>4</span></div>
+        <div class="buyuk-deger" id="zGoster">+0,00</div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:12.5px"><span>Karşılık gelen X değeri:</span><b id="zX" style="font-family:var(--mono)"></b></div>
+      </div>
+      <div id="mP" class="gizli">
+        <p class="kb">GİRDİ: YÜZDELİK (SOLDAKİ ALAN)</p>
+        <input type="range" id="pIn" min="0.1" max="99.9" step="0.1" value="50"><div class="olcek"><span>%0,1</span><span>%50</span><span>%99,9</span></div>
+        <div class="buyuk-deger" id="pGoster">%50,0</div>
+      </div>
+      <div id="mA" class="gizli">
+        <p class="kb">GİRDİ: X ARALIĞI</p>
+        <div class="izgara-2" style="gap:8px"><label style="font-size:12px">a (alt)<input type="number" id="aIn" value="-1" step="0.1"></label><label style="font-size:12px">b (üst)<input type="number" id="bIn" value="1" step="0.1"></label></div>
+        <div class="buyuk-deger" id="aGoster" style="font-size:18px"></div>
+      </div>
+      <div class="cikti"><div><div style="font-size:11px;letter-spacing:.12em;opacity:.7">ÇIKTI</div><b id="ciktiAd" style="font-size:16px">Yüzdelik</b></div><div class="d" id="cikti">%50</div></div>
+      <p id="ciktiAcik"></p>
+    </aside>
+  </div>
+</main>
+<div class="alt-bilgi">İstatistiğe Giriş · Etkileşimli Uygulamalar · Uygulama 07 — <a href="../index.html">Portala dön</a></div>
+
+<script src="../assets/istat.js"></script>
+<script>
+(() => {
+  const {$, el, f} = I;
+  let mod = 'z', yakin = false;
+  const mu = () => +$('mu').value, sg = () => +$('sigma').value;
+  function ciz() {
+    const m = mu(), s = sg(); $('muS').value = m; $('sigmaS').value = s;
+    const svg = $('svg'); svg.innerHTML = ''; const W = 900, H = 400, L = 50, R = 24, T = 40, B = 50;
+    const lo = yakin ? m - 4.2 * s : -35, hi = yakin ? m + 4.2 * s : 35;
+    const x = I.olcek(lo, hi, L, W - R), pdf = v => I.phi((v - m) / s) / s, ymax = pdf(m) * 1.08, y = I.olcek(0, ymax, H - B, T);
+    const xt = I.tikler(lo, hi, 10);
+    I.eksenler(svg, {W, H, L, R, T, B, x, y, xt, yt: [], yEksen: false, izgara: false});
+    const yol = (a, b) => { a = Math.max(a, lo); b = Math.min(b, hi); if (b <= a) return ''; let d = `M${x(a)},${y(0)}`; for (let i = 0; i <= 300; i++) { const v = a + (b - a) * i / 300; d += ` L${x(v)},${y(pdf(v))}`; } return d + ` L${x(b)},${y(0)} Z`; };
+    if ($('ampirik').checked) {
+      [[3, '#fde68a', '%99,7'], [2, '#fdba74', '%95'], [1, '#fca5a5', '%68']].forEach(([k, r, t], i) => {
+        el('path', {d: yol(m - k * s, m + k * s), fill: r, 'fill-opacity': .75}, svg);
+        const yy = y(pdf(m - k * s)) - 14 - (3 - k) * 0;
+        el('line', {x1: x(m - k * s), x2: x(m + k * s), y1: H - B + 30 - 0 + (k - 1) * 0, y2: H - B + 30, stroke: 'none'}, svg);
+        [-k, k].forEach(sg2 => { const xv = m + sg2 * s; if (xv < lo || xv > hi) return;
+          el('line', {x1: x(xv), x2: x(xv), y1: y(pdf(xv)), y2: y(0), stroke: '#9a3412', 'stroke-dasharray': '3 3'}, svg);
+          el('text', {x: x(xv), y: y(0) - 6, 'text-anchor': 'middle', 'font-size': 10.5, fill: '#9a3412', 'font-weight': 700, ...I.halo}, svg, (sg2 > 0 ? '+' : '−') + k + 'σ'); });
+        el('rect', {x: L + 8, y: 14 + (3 - k) * 22, width: 14, height: 14, rx: 3, fill: r}, svg);
+        el('text', {x: L + 28, y: 26 + (3 - k) * 22, 'font-size': 12.5, 'font-weight': 800, fill: '#7c2d12'}, svg, `μ ± ${k}σ içinde: ${t}`);
+      });
+    }
+    // hesaplayıcı alanı
+    if ($('alanGoster').checked) { let d = '';
+      if (mod === 'z') d = yol(-1e9, m + +$('zIn').value * s);
+      else if (mod === 'p') d = yol(-1e9, m + I.invPhi(+$('pIn').value / 100) * s);
+      else { const a = Math.min(+$('aIn').value, +$('bIn').value), b = Math.max(+$('aIn').value, +$('bIn').value); d = yol(a, b); }
+      if (d) el('path', {d, fill: '#0b4a8b', 'fill-opacity': .25, stroke: '#0b4a8b', 'stroke-dasharray': '2 2'}, svg); }
+    let d = ''; for (let i = 0; i <= 500; i++) { const v = lo + (hi - lo) * i / 500; d += (i ? ' L' : 'M') + x(v) + ',' + y(pdf(v)); }
+    el('path', {d, fill: 'none', stroke: '#0b4a8b', 'stroke-width': 2.4}, svg);
+    if (m >= lo && m <= hi) { el('line', {x1: x(m), x2: x(m), y1: y(pdf(m)), y2: y(0), stroke: '#c8202e', 'stroke-dasharray': '4 3'}, svg);
+      el('text', {x: x(m), y: y(0) + 34, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 800, fill: '#c8202e'}, svg, 'μ = ' + f(m, 1)); }
+    el('text', {x: W - R - 44, y: 24, 'text-anchor': 'end', 'font-size': 13, 'font-family': 'Georgia,serif', fill: '#0b4a8b', 'font-weight': 700}, svg, `X ~ N(${f(m, 1)}; ${f(s, 1)}²)`);
+    $('ampirikAcik').innerHTML = `Bu modelde: <b>%68</b> değer [${f(m - s, 1)}; ${f(m + s, 1)}], <b>%95</b> değer [${f(m - 2 * s, 1)}; ${f(m + 2 * s, 1)}], <b>%99,7</b> değer [${f(m - 3 * s, 1)}; ${f(m + 3 * s, 1)}] aralığındadır.`;
+    hesap();
+  }
+  function hesap() {
+    const m = mu(), s = sg();
+    if (mod === 'z') { const z = +$('zIn').value, p = I.Phi(z);
+      $('zGoster').textContent = I.isaretli(z, 2); $('zX').textContent = `x = μ + zσ = ${f(m + z * s, 2)}`;
+      $('ciktiAd').textContent = 'Yüzdelik'; $('cikti').textContent = '%' + f(p * 100, p > .999 || p < .001 ? 2 : 1).replace(/,0$/, '');
+      $('ciktiAcik').innerHTML = `Normal eğrinin altındaki alanın <b>%${f(p * 100, 2)}</b>'si Z = ${f(z, 2)} değerinin <b>solunda</b> kalır. Sağda kalan alan: %${f((1 - p) * 100, 2)}.`;
+    } else if (mod === 'p') { const p = +$('pIn').value / 100, z = I.invPhi(p);
+      $('pGoster').textContent = '%' + f(p * 100, 1); $('ciktiAd').textContent = 'Z-puanı'; $('cikti').textContent = I.isaretli(z, 3);
+      $('ciktiAcik').innerHTML = `Soldaki alanın %${f(p * 100, 1)} olduğu nokta <b>Z = ${f(z, 3)}</b>, yani bu modelde <b>X = ${f(m + z * s, 2)}</b>.`;
+    } else { const a = Math.min(+$('aIn').value, +$('bIn').value), b = Math.max(+$('aIn').value, +$('bIn').value);
+      const za = (a - m) / s, zb = (b - m) / s, p = I.Phi(zb) - I.Phi(za);
+      $('aGoster').textContent = `z: ${f(za, 2)} … ${f(zb, 2)}`; $('ciktiAd').textContent = 'P(a < X < b)'; $('cikti').textContent = '%' + f(p * 100, 2);
+      $('ciktiAcik').innerHTML = `P(${f(a, 2)} < X < ${f(b, 2)}) = Φ(${f(zb, 2)}) − Φ(${f(za, 2)}) = <b>${f(p, 4)}</b>.`; }
+  }
+  ['mu', 'sigma', 'ampirik', 'alanGoster'].forEach(id => $(id).addEventListener('input', ciz));
+  ['zIn', 'pIn', 'aIn', 'bIn'].forEach(id => $(id).addEventListener('input', ciz));
+  $('muS').addEventListener('change', e => { $('mu').value = Math.max(-20, Math.min(20, +e.target.value)); ciz(); });
+  $('sigmaS').addEventListener('change', e => { $('sigma').value = Math.max(.1, Math.min(10, +e.target.value)); ciz(); });
+  document.querySelectorAll('#modSec .btn').forEach(b => b.addEventListener('click', () => { mod = b.dataset.m;
+    document.querySelectorAll('#modSec .btn').forEach(x => x.classList.toggle('aktif', x === b));
+    $('mZ').classList.toggle('gizli', mod !== 'z'); $('mP').classList.toggle('gizli', mod !== 'p'); $('mA').classList.toggle('gizli', mod !== 'ara'); ciz(); }));
+  $('sigdir').addEventListener('click', () => { yakin = !yakin; $('sigdir').textContent = yakin ? '⤡ Sabit eksen (−35…35)' : '⤢ Eğriye yakınlaş'; ciz(); });
+  $('sifirla').addEventListener('click', () => { $('mu').value = 0; $('sigma').value = 1; ciz(); });
+  ciz();
+})();
+</script>
+</body>
+</html>
